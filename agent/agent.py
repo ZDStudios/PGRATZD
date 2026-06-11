@@ -16,6 +16,7 @@ Install dependencies first:  pip install -r requirements.txt
 
 import io
 import os
+import socket
 import sys
 import time
 from urllib.parse import quote
@@ -25,16 +26,16 @@ import websocket  # from the 'websocket-client' package
 from PIL import Image
 
 SERVER_URL = os.environ.get("SERVER_URL")
-TOKEN = os.environ.get("STREAM_TOKEN")
+TOKEN = os.environ.get("STREAM_TOKEN", "changeme")
 FPS = float(os.environ.get("FPS", "4"))
 MAX_WIDTH = int(os.environ.get("MAX_WIDTH", "1280"))
 QUALITY = int(os.environ.get("QUALITY", "60"))
+DEVICE_NAME = os.environ.get("DEVICE_NAME", socket.gethostname())
 
-if not SERVER_URL or not TOKEN:
-    print("Set SERVER_URL and STREAM_TOKEN environment variables first.")
+if not SERVER_URL:
+    print("Set SERVER_URL environment variable first.")
     print("Example (PowerShell):")
     print('  $env:SERVER_URL="wss://your-app.onrender.com"')
-    print('  $env:STREAM_TOKEN="your-secret-token"')
     print("  python agent.py")
     sys.exit(1)
 
@@ -43,7 +44,7 @@ FRAME_INTERVAL = max(1.0 / FPS, 0.05)
 
 def ws_url():
     base = SERVER_URL.rstrip("/")
-    return f"{base}/?role=agent&token={quote(TOKEN)}"
+    return f"{base}/?role=agent&token={quote(TOKEN)}&name={quote(DEVICE_NAME)}"
 
 
 def grab_jpeg(sct, monitor):
@@ -61,7 +62,7 @@ def grab_jpeg(sct, monitor):
 def stream_once():
     """Connect and stream until the socket drops; raises on error."""
     ws = websocket.create_connection(ws_url(), enable_multithread=True)
-    print(f"streaming at ~{FPS} fps (width {MAX_WIDTH}, quality {QUALITY}). Ctrl+C to stop.")
+    print(f"streaming as '{DEVICE_NAME}' at ~{FPS} fps (width {MAX_WIDTH}, quality {QUALITY}). Ctrl+C to stop.")
     with mss.mss() as sct:
         monitor = sct.monitors[1]  # primary monitor; use [0] for all monitors
         while True:

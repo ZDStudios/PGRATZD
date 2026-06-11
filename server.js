@@ -1,12 +1,3 @@
-// Screen-stream relay server.
-// Deployed on Render. It:
-//   1. Serves the web dashboard (public/index.html)
-//   2. Accepts JPEG frames from your local agent over a WebSocket
-//   3. Broadcasts those frames to every browser viewing the dashboard
-//
-// Auth is a shared secret in the STREAM_TOKEN env var. Both the agent and
-// the dashboard must present the same token or the socket is rejected.
-
 const path = require("path");
 const http = require("http");
 const express = require("express");
@@ -22,9 +13,27 @@ app.get("/healthz", (_req, res) => res.send("ok"));
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-const agents = new Set(); // local capture scripts pushing frames
-const viewers = new Set(); // browsers watching the dashboard
-let lastFrame = null; // cache so a new viewer sees something immediately
+// agents: id -> { ws, name, lastFrame, connectedAt }
+const agents = new Map();
+// viewers: ws -> { watchingId }
+const viewers = new Map();
+
+let agentSeq = 0;
+
+function agentList() {
+  return [...agents.entries()].map(([id, a]) => ({
+    id,
+    name: a.name,
+    connectedAt: a.connectedAt,
+  }));
+}
+
+function broadcast(msg) {
+  const raw = JSON.stringify(msg);
+  for (const [vws] of viewers) {
+    if (vws.readyState === vws.OPEN) vws.send(raw);
+  }
+}
 
 wss.on("connection", (ws, req) => {
   const url = new URL(req.url, "http://localhost");
@@ -36,33 +45,51 @@ wss.on("connection", (ws, req) => {
       ws.close(1008, "invalid token");
       return;
     }
-    agents.add(ws);
-    console.log(`agent connected (${agents.size} total)`);
+
+    const id = `a${++agentSeq}`;
+    const name = url.searchParams.get("name") || "Unknown Device";
+    const agent = { ws, name, lastFrame: null, connectedAt: Date.now() };
+    agents.set(id, agent);
+    console.log(`agent connected: ${name} (${id}), total: ${agents.size}`);
+    broadcast({ type: "agents", list: agentList() });
 
     ws.on("message", (data) => {
-      lastFrame = data;
-      for (const viewer of viewers) {
-        if (viewer.readyState === viewer.OPEN) {
-          viewer.send(data, { binary: true });
+      agent.lastFrame = data;
+      for (const [vws, vstate] of viewers) {
+        if (vstate.watchingId === id && vws.readyState === vws.OPEN) {
+          vws.send(data, { binary: true });
         }
       }
     });
 
     ws.on("close", () => {
-      agents.delete(ws);
-      console.log(`agent disconnected (${agents.size} left)`);
+      agents.delete(id);
+      console.log(`agent disconnected: ${name} (${id}), total: ${agents.size}`);
+      broadcast({ type: "agent_offline", id });
+      broadcast({ type: "agents", list: agentList() });
     });
-  } else {
-    viewers.add(ws);
-    console.log(`viewer connected (${viewers.size} total)`);
 
-    // Tell the viewer whether a screen is currently being streamed.
-    ws.send(JSON.stringify({ type: "status", agents: agents.size }));
-    if (lastFrame) ws.send(lastFrame, { binary: true });
+  } else {
+    const vstate = { watchingId: null };
+    viewers.set(ws, vstate);
+    console.log(`viewer connected, total: ${viewers.size}`);
+
+    ws.send(JSON.stringify({ type: "agents", list: agentList() }));
+
+    ws.on("message", (data) => {
+      try {
+        const msg = JSON.parse(data.toString());
+        if (msg.type === "watch") {
+          vstate.watchingId = msg.id;
+          const agent = agents.get(msg.id);
+          if (agent?.lastFrame) ws.send(agent.lastFrame, { binary: true });
+        }
+      } catch (_) {}
+    });
 
     ws.on("close", () => {
       viewers.delete(ws);
-      console.log(`viewer disconnected (${viewers.size} left)`);
+      console.log(`viewer disconnected, total: ${viewers.size}`);
     });
   }
 });
