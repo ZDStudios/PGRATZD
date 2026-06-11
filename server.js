@@ -31,12 +31,11 @@ wss.on("connection", (ws, req) => {
   const role = url.searchParams.get("role");
   const token = url.searchParams.get("token");
 
-  if (token !== TOKEN) {
-    ws.close(1008, "invalid token");
-    return;
-  }
-
   if (role === "agent") {
+    if (token !== TOKEN) {
+      ws.close(1008, "invalid token");
+      return;
+    }
     agents.add(ws);
     console.log(`agent connected (${agents.size} total)`);
 

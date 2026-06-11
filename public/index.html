@@ -44,26 +44,6 @@
         background: #2ecc71;
         box-shadow: 0 0 8px #2ecc71;
       }
-      input {
-        background: #0d0f12;
-        border: 1px solid #2a2f37;
-        color: #e6e8eb;
-        padding: 6px 10px;
-        border-radius: 6px;
-        font-size: 13px;
-      }
-      button {
-        background: #2f6fed;
-        border: none;
-        color: white;
-        padding: 6px 14px;
-        border-radius: 6px;
-        font-size: 13px;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #4480f5;
-      }
       main {
         flex: 1;
         display: flex;
@@ -90,27 +70,17 @@
     <header>
       <span class="dot" id="dot"></span>
       <h1>Screen Stream</h1>
-      <input id="token" type="password" placeholder="access token" />
-      <button id="connect">Connect</button>
     </header>
     <main>
       <img id="screen" alt="remote screen" />
-      <div class="placeholder" id="placeholder">
-        Enter your access token and click Connect.
-      </div>
+      <div class="placeholder" id="placeholder">Connecting…</div>
     </main>
 
     <script>
       const img = document.getElementById("screen");
       const dot = document.getElementById("dot");
       const placeholder = document.getElementById("placeholder");
-      const tokenInput = document.getElementById("token");
-      const connectBtn = document.getElementById("connect");
 
-      // Remember the token between visits.
-      tokenInput.value = localStorage.getItem("streamToken") || "";
-
-      let ws = null;
       let currentUrl = null;
 
       function setLive(live, msg) {
@@ -122,20 +92,10 @@
       }
 
       function connect() {
-        const token = tokenInput.value.trim();
-        if (!token) {
-          placeholder.textContent = "Please enter your access token.";
-          return;
-        }
-        localStorage.setItem("streamToken", token);
-        if (ws) ws.close();
-
         const proto = location.protocol === "https:" ? "wss" : "ws";
-        const url = `${proto}://${location.host}/?role=viewer&token=${encodeURIComponent(token)}`;
-        ws = new WebSocket(url);
+        const url = `${proto}://${location.host}/?role=viewer`;
+        const ws = new WebSocket(url);
         ws.binaryType = "blob";
-
-        setLive(false, "Connecting…");
 
         ws.onopen = () => setLive(false, "Connected. Waiting for screen…");
 
@@ -149,7 +109,6 @@
             } catch (_) {}
             return;
           }
-          // Binary frame: swap it into the <img>.
           const next = URL.createObjectURL(event.data);
           img.onload = () => {
             if (currentUrl) URL.revokeObjectURL(currentUrl);
@@ -162,17 +121,15 @@
         };
 
         ws.onclose = () => {
-          setLive(false, "Disconnected. Click Connect to retry.");
+          setLive(false, "Disconnected. Reconnecting in 3s…");
           img.style.display = "none";
+          setTimeout(connect, 3000);
         };
 
-        ws.onerror = () => setLive(false, "Connection error. Check your token.");
+        ws.onerror = () => setLive(false, "Connection error. Retrying…");
       }
 
-      connectBtn.addEventListener("click", connect);
-      tokenInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") connect();
-      });
+      connect();
     </script>
   </body>
 </html>
