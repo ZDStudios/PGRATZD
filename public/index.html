@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Screen Stream</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: #0d0f12;
+        color: #e6e8eb;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        background: #16191e;
+        border-bottom: 1px solid #262b33;
+      }
+      header h1 {
+        font-size: 15px;
+        font-weight: 600;
+        margin: 0;
+        margin-right: auto;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #555;
+      }
+      .dot.live {
+        background: #2ecc71;
+        box-shadow: 0 0 8px #2ecc71;
+      }
+      input {
+        background: #0d0f12;
+        border: 1px solid #2a2f37;
+        color: #e6e8eb;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+      }
+      button {
+        background: #2f6fed;
+        border: none;
+        color: white;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #4480f5;
+      }
+      main {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: 12px;
+      }
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 8px;
+        border: 1px solid #262b33;
+        display: none;
+      }
+      .placeholder {
+        color: #6b7280;
+        font-size: 14px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="dot" id="dot"></span>
+      <h1>Screen Stream</h1>
+      <input id="token" type="password" placeholder="access token" />
+      <button id="connect">Connect</button>
+    </header>
+    <main>
+      <img id="screen" alt="remote screen" />
+      <div class="placeholder" id="placeholder">
+        Enter your access token and click Connect.
+      </div>
+    </main>
+
+    <script>
+      const img = document.getElementById("screen");
+      const dot = document.getElementById("dot");
+      const placeholder = document.getElementById("placeholder");
+      const tokenInput = document.getElementById("token");
+      const connectBtn = document.getElementById("connect");
+
+      // Remember the token between visits.
+      tokenInput.value = localStorage.getItem("streamToken") || "";
+
+      let ws = null;
+      let currentUrl = null;
+
+      function setLive(live, msg) {
+        dot.classList.toggle("live", live);
+        if (msg) {
+          placeholder.textContent = msg;
+          placeholder.style.display = live ? "none" : "block";
+        }
+      }
+
+      function connect() {
+        const token = tokenInput.value.trim();
+        if (!token) {
+          placeholder.textContent = "Please enter your access token.";
+          return;
+        }
+        localStorage.setItem("streamToken", token);
+        if (ws) ws.close();
+
+        const proto = location.protocol === "https:" ? "wss" : "ws";
+        const url = `${proto}://${location.host}/?role=viewer&token=${encodeURIComponent(token)}`;
+        ws = new WebSocket(url);
+        ws.binaryType = "blob";
+
+        setLive(false, "Connecting…");
+
+        ws.onopen = () => setLive(false, "Connected. Waiting for screen…");
+
+        ws.onmessage = (event) => {
+          if (typeof event.data === "string") {
+            try {
+              const m = JSON.parse(event.data);
+              if (m.type === "status" && m.agents === 0) {
+                setLive(false, "Connected. No computer is streaming yet.");
+              }
+            } catch (_) {}
+            return;
+          }
+          // Binary frame: swap it into the <img>.
+          const next = URL.createObjectURL(event.data);
+          img.onload = () => {
+            if (currentUrl) URL.revokeObjectURL(currentUrl);
+            currentUrl = next;
+          };
+          img.src = next;
+          img.style.display = "block";
+          placeholder.style.display = "none";
+          setLive(true);
+        };
+
+        ws.onclose = () => {
+          setLive(false, "Disconnected. Click Connect to retry.");
+          img.style.display = "none";
+        };
+
+        ws.onerror = () => setLive(false, "Connection error. Check your token.");
+      }
+
+      connectBtn.addEventListener("click", connect);
+      tokenInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") connect();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: screen-stream
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: STREAM_TOKEN
+        generateValue: true # Render makes a random secret; copy it for the agent
