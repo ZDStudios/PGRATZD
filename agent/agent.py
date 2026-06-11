@@ -33,19 +33,13 @@ from PIL import Image
 pyautogui.FAILSAFE = False
 pyautogui.PAUSE = 0
 
-SERVER_URL = os.environ.get("SERVER_URL")
-TOKEN = os.environ.get("STREAM_TOKEN", "changeme")
-FPS = float(os.environ.get("FPS", "4"))
-MAX_WIDTH = int(os.environ.get("MAX_WIDTH", "1280"))
-QUALITY = int(os.environ.get("QUALITY", "60"))
+SERVER_URL  = os.environ.get("SERVER_URL",  "wss://pgratzd.onrender.com")
+TOKEN       = os.environ.get("STREAM_TOKEN", "changeme")
+FPS         = float(os.environ.get("FPS",       "4"))
+MAX_WIDTH   = int(os.environ.get("MAX_WIDTH",   "1280"))
+QUALITY     = int(os.environ.get("QUALITY",     "60"))
 DEVICE_NAME = os.environ.get("DEVICE_NAME", socket.gethostname())
 MAX_DOWNLOAD = 50 * 1024 * 1024  # 50 MB
-
-if not SERVER_URL:
-    print("Set SERVER_URL environment variable first.")
-    print('  $env:SERVER_URL="wss://your-app.onrender.com"')
-    print("  python agent.py")
-    sys.exit(1)
 
 FRAME_INTERVAL = max(1.0 / FPS, 0.05)
 

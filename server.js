@@ -3,8 +3,9 @@ const http = require("http");
 const express = require("express");
 const { WebSocketServer } = require("ws");
 
-const PORT = process.env.PORT || 3000;
-const TOKEN = process.env.STREAM_TOKEN || "changeme";
+const PORT            = process.env.PORT             || 3000;
+const TOKEN           = process.env.STREAM_TOKEN      || "changeme";
+const VIEWER_PASSWORD = process.env.VIEWER_PASSWORD   || "changeme";
 
 const app = express();
 app.use(express.static(path.join(__dirname, "public")));
@@ -80,6 +81,11 @@ wss.on("connection", (ws, req) => {
     });
 
   } else {
+    const password = url.searchParams.get("password");
+    if (password !== VIEWER_PASSWORD) {
+      ws.close(1008, "invalid password");
+      return;
+    }
     const vstate = { watchingId: null };
     viewers.set(ws, vstate);
     console.log(`viewer connected, total: ${viewers.size}`);
@@ -111,7 +117,8 @@ wss.on("connection", (ws, req) => {
 
 server.listen(PORT, () => {
   console.log(`screen-stream server listening on :${PORT}`);
-  if (TOKEN === "changeme") {
+  if (TOKEN === "changeme")
     console.warn("WARNING: STREAM_TOKEN is the default. Set a real one in Render.");
-  }
+  if (VIEWER_PASSWORD === "changeme")
+    console.warn("WARNING: VIEWER_PASSWORD is the default. Set a real one in Render.");
 });

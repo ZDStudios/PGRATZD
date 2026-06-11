@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Screen Stream</title>
+    <title>PGRATZD</title>
     <style>
       :root { color-scheme: dark; }
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,11 +13,38 @@
         display: flex; height: 100vh; overflow: hidden;
       }
 
+      /* ── Login overlay ── */
+      #login-overlay {
+        position: fixed; inset: 0; z-index: 999;
+        background: #080a0d;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity .25s;
+      }
+      #login-overlay.gone { opacity: 0; pointer-events: none; }
+      .login-box { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 300px; }
+      .login-wordmark { font-size: 38px; font-weight: 800; letter-spacing: .25em; color: #e6e8eb; margin-bottom: 4px; }
+      .login-sub { font-size: 12px; color: #4b5563; letter-spacing: .08em; text-transform: uppercase; margin-top: -8px; margin-bottom: 8px; }
+      .login-error { font-size: 12px; color: #f87171; text-align: center; min-height: 16px; }
+      .login-input {
+        width: 100%; background: #13161b; border: 1px solid #2a2f37;
+        color: #e6e8eb; padding: 11px 14px; border-radius: 8px;
+        font-size: 14px; outline: none; letter-spacing: .05em;
+        transition: border-color .15s;
+      }
+      .login-input:focus { border-color: #2f6fed; }
+      .login-btn {
+        width: 100%; background: #2f6fed; border: none; color: #fff;
+        padding: 11px; border-radius: 8px; font-size: 14px; font-weight: 600;
+        cursor: pointer; transition: background .15s; letter-spacing: .03em;
+      }
+      .login-btn:hover { background: #4480f5; }
+      .login-btn:disabled { opacity: .5; cursor: default; }
+
       /* ── Sidebar ── */
       aside { width: 230px; flex-shrink: 0; background: #13161b; border-right: 1px solid #1e2229; display: flex; flex-direction: column; }
       .sidebar-top { padding: 18px 16px 12px; border-bottom: 1px solid #1e2229; }
-      .logo { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
-      .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #2f6fed; }
+      .logo { font-size: 13px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+      .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #2f6fed; flex-shrink: 0; }
       .section-label { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #4b5563; padding: 14px 16px 6px; }
       .device-list { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
       .device-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 7px; cursor: pointer; transition: background .12s; margin-bottom: 1px; user-select: none; }
@@ -40,7 +67,7 @@
       .back-btn { font-size: 12px; color: #6b7280; cursor: pointer; padding: 4px 8px; border-radius: 5px; transition: background .12s, color .12s; display: none; user-select: none; }
       .back-btn:hover { background: #1e2229; color: #e6e8eb; }
       .back-btn.show { display: inline; }
-      .topbar-title { font-size: 14px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .topbar-title { font-size: 14px; font-weight: 700; letter-spacing: .06em; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .tab-group { display: none; gap: 2px; background: #0d0f12; padding: 3px; border-radius: 7px; }
       .tab-group.show { display: flex; }
       .tab-btn { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 5px; border: none; background: transparent; color: #6b7280; cursor: pointer; transition: background .12s, color .12s; user-select: none; }
@@ -60,7 +87,7 @@
 
       /* Home */
       #home { width: 100%; max-width: 740px; text-align: center; padding: 16px; }
-      .home-title { font-size: 32px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px; }
+      .home-title { font-size: 36px; font-weight: 800; letter-spacing: .18em; margin-bottom: 8px; }
       .home-sub { font-size: 14px; color: #6b7280; margin-bottom: 36px; }
       .device-grid { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
       .device-card { background: #13161b; border: 1px solid #1e2229; border-radius: 12px; padding: 18px 22px; cursor: pointer; transition: border-color .15s, background .15s, transform .1s; min-width: 160px; text-align: left; user-select: none; }
@@ -159,10 +186,23 @@
     </style>
   </head>
   <body>
+    <!-- Login overlay -->
+    <div id="login-overlay">
+      <div class="login-box">
+        <div class="login-wordmark">PGRATZD</div>
+        <div class="login-sub">Remote Dashboard</div>
+        <div class="login-error" id="login-error"></div>
+        <input class="login-input" id="login-input" type="password"
+          placeholder="Password" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') loginSubmit()" />
+        <button class="login-btn" id="login-btn" onclick="loginSubmit()">Unlock</button>
+      </div>
+    </div>
+
     <!-- Sidebar -->
     <aside>
       <div class="sidebar-top">
-        <div class="logo"><div class="logo-dot"></div>Screen Stream</div>
+        <div class="logo"><div class="logo-dot"></div>PGRATZD</div>
       </div>
       <div class="section-label">Devices</div>
       <div class="device-list" id="device-list">
@@ -178,7 +218,7 @@
     <main>
       <div class="topbar">
         <span class="back-btn" id="back-btn" onclick="showHome()">&#8592; Home</span>
-        <div class="topbar-title" id="topbar-title">Screen Stream</div>
+        <div class="topbar-title" id="topbar-title">PGRATZD</div>
         <div class="tab-group" id="tab-group">
           <button class="tab-btn active" data-tab="screen"   onclick="switchTab('screen')">Screen</button>
           <button class="tab-btn"        data-tab="files"    onclick="switchTab('files')">Files</button>
@@ -189,9 +229,9 @@
       </div>
 
       <div class="content">
-        <!-- Home dashboard -->
+        <!-- Home -->
         <div id="home">
-          <div class="home-title">Screen Stream</div>
+          <div class="home-title">PGRATZD</div>
           <div class="home-sub" id="home-sub">Waiting for devices to connect…</div>
           <div class="device-grid" id="device-grid">
             <div class="empty-hint">Start <code>agent.py</code> on any machine<br>and it will appear here automatically.</div>
@@ -277,16 +317,35 @@
       // ── App state ─────────────────────────────────────────────
       let ws = null, devices = {}, watchingId = null, currentUrl = null;
       let activeTab = "screen", controlActive = false, lastMouseSend = 0;
-
-      // File explorer state
+      let viewerPassword = localStorage.getItem("pgratzd_pw") || "";
       let fePath = null, feParent = null, feEntries = [];
-      let feReqId = 0;
-      const fePending = new Map();
-
-      // Terminal state
+      let feReqId = 0; const fePending = new Map();
       let termHistory = [], termHistIdx = -1, termRunning = false;
-      let termReqId = 0;
-      const termPending = new Map();
+      let termReqId = 0; const termPending = new Map();
+
+      // ── Login ─────────────────────────────────────────────────
+      function loginSubmit() {
+        const pw = document.getElementById("login-input").value.trim();
+        if (!pw) return;
+        viewerPassword = pw;
+        document.getElementById("login-btn").disabled = true;
+        document.getElementById("login-btn").textContent = "Connecting…";
+        document.getElementById("login-error").textContent = "";
+        connect();
+      }
+      function showLogin(errMsg) {
+        const overlay = document.getElementById("login-overlay");
+        overlay.classList.remove("gone");
+        document.getElementById("login-input").value = "";
+        document.getElementById("login-btn").disabled = false;
+        document.getElementById("login-btn").textContent = "Unlock";
+        document.getElementById("login-error").textContent = errMsg || "";
+        setTimeout(() => document.getElementById("login-input").focus(), 80);
+      }
+      function hideLogin() {
+        document.getElementById("login-overlay").classList.add("gone");
+        localStorage.setItem("pgratzd_pw", viewerPassword);
+      }
 
       // ── Utilities ─────────────────────────────────────────────
       const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -300,13 +359,12 @@
 
       // ── Sidebar ───────────────────────────────────────────────
       function renderSidebar() {
-        const ids = Object.keys(devices);
-        $noDevices.style.display = ids.length ? "none" : "block";
-        const existing = new Set([...$deviceList.querySelectorAll(".device-item")].map(el=>el.dataset.id));
+        const ids=Object.keys(devices); $noDevices.style.display=ids.length?"none":"block";
+        const existing=new Set([...$deviceList.querySelectorAll(".device-item")].map(el=>el.dataset.id));
         for(const id of existing) if(!devices[id]) $deviceList.querySelector(`[data-id="${id}"]`).remove();
         for(const id of ids) {
           const d=devices[id]; let el=$deviceList.querySelector(`[data-id="${id}"]`);
-          if(!el) { el=document.createElement("div"); el.className="device-item"; el.dataset.id=id; el.innerHTML=`<div class="live-dot"></div><div class="device-info"><div class="device-name"></div><div class="device-meta"></div></div>`; el.addEventListener("click",()=>watchDevice(id)); $deviceList.appendChild(el); }
+          if(!el){el=document.createElement("div");el.className="device-item";el.dataset.id=id;el.innerHTML=`<div class="live-dot"></div><div class="device-info"><div class="device-name"></div><div class="device-meta"></div></div>`;el.addEventListener("click",()=>watchDevice(id));$deviceList.appendChild(el);}
           el.querySelector(".device-name").textContent=d.name;
           el.querySelector(".device-meta").textContent=`Live · ${timeAgo(d.connectedAt)} ago`;
           el.classList.toggle("active",id===watchingId);
@@ -314,7 +372,7 @@
       }
       function renderHome() {
         const ids=Object.keys(devices);
-        if(!ids.length) { $homeSub.textContent="Waiting for devices to connect…"; $deviceGrid.innerHTML=`<div class="empty-hint">Start <code>agent.py</code> on any machine<br>and it will appear here automatically.</div>`; return; }
+        if(!ids.length){$homeSub.textContent="Waiting for devices to connect…";$deviceGrid.innerHTML=`<div class="empty-hint">Start <code>agent.py</code> on any machine<br>and it will appear here automatically.</div>`;return;}
         $homeSub.textContent=`${ids.length} device${ids.length>1?"s":""} online — click one to view`;
         $deviceGrid.innerHTML=ids.map(id=>`<div class="device-card" data-id="${esc(id)}"><div class="card-indicator"><div class="card-dot"></div><span class="card-live">LIVE</span></div><div class="card-name">${esc(devices[id].name)}</div><div class="card-meta">Connected ${timeAgo(devices[id].connectedAt)} ago</div></div>`).join("");
         $deviceGrid.querySelectorAll(".device-card").forEach(el=>el.addEventListener("click",()=>watchDevice(el.dataset.id)));
@@ -323,17 +381,15 @@
       // ── Navigation ────────────────────────────────────────────
       function showHome() {
         stopControl(); watchingId=null; fePath=null; activeTab="screen";
-        $home.style.display="block";
-        $screenTab.classList.remove("active"); $filesTab.classList.remove("active"); $terminalTab.classList.remove("active");
-        $tabGroup.classList.remove("show"); $topbarTitle.textContent="Screen Stream";
-        $badge.className="badge"; $backBtn.classList.remove("show"); $ctrlBtn.classList.remove("show");
+        $home.style.display="block"; $screenTab.classList.remove("active"); $filesTab.classList.remove("active"); $terminalTab.classList.remove("active");
+        $tabGroup.classList.remove("show"); $topbarTitle.textContent="PGRATZD"; $badge.className="badge";
+        $backBtn.classList.remove("show"); $ctrlBtn.classList.remove("show");
         renderSidebar(); renderHome();
       }
       function watchDevice(id) {
-        if(!devices[id]) return;
+        if(!devices[id])return;
         stopControl(); termClear(); watchingId=id; fePath=null; activeTab="screen";
-        $home.style.display="none";
-        $screenTab.classList.add("active"); $filesTab.classList.remove("active"); $terminalTab.classList.remove("active");
+        $home.style.display="none"; $screenTab.classList.add("active"); $filesTab.classList.remove("active"); $terminalTab.classList.remove("active");
         $tabGroup.classList.add("show");
         document.querySelectorAll(".tab-btn").forEach(el=>el.classList.toggle("active",el.dataset.tab==="screen"));
         $overlayMsg.className="overlay-msg show"; $overlayMsg.textContent="Waiting for first frame…";
@@ -345,37 +401,17 @@
       function switchTab(tab) {
         activeTab=tab;
         document.querySelectorAll(".tab-btn").forEach(el=>el.classList.toggle("active",el.dataset.tab===tab));
-        $screenTab.classList.toggle("active",tab==="screen");
-        $filesTab.classList.toggle("active",tab==="files");
-        $terminalTab.classList.toggle("active",tab==="terminal");
+        $screenTab.classList.toggle("active",tab==="screen"); $filesTab.classList.toggle("active",tab==="files"); $terminalTab.classList.toggle("active",tab==="terminal");
         if(tab==="files"&&watchingId&&!fePath) feNavigate(null);
         if(tab==="terminal") setTimeout(()=>$termInput.focus(),50);
       }
 
       // ── Remote Control ────────────────────────────────────────
-      function sendControl(msg) { if(ws&&ws.readyState===WebSocket.OPEN&&watchingId) ws.send(JSON.stringify({type:"control",...msg})); }
-      function releaseModifiers() { for(const c of["ShiftLeft","ShiftRight","ControlLeft","ControlRight","AltLeft","AltRight","MetaLeft","MetaRight"]) sendControl({event:"keyup",code:c}); }
-      function stopControl() {
-        if(!controlActive) return; releaseModifiers(); controlActive=false;
-        $ctrlBtn.className="ctrl-btn show"; $ctrlBtn.textContent="Enable Control";
-        $streamImg.classList.remove("controlling");
-        document.removeEventListener("keydown",onKeyDown,true); document.removeEventListener("keyup",onKeyUp,true);
-      }
-      function toggleControl() {
-        if(controlActive){stopControl();return;}
-        controlActive=true; $ctrlBtn.className="ctrl-btn show on"; $ctrlBtn.textContent="Disable Control";
-        $streamImg.classList.add("controlling");
-        document.addEventListener("keydown",onKeyDown,true); document.addEventListener("keyup",onKeyUp,true);
-      }
-      function imgCoords(e) {
-        if(!$streamImg.naturalWidth) return null;
-        const r=$streamImg.getBoundingClientRect(),ir=$streamImg.naturalWidth/$streamImg.naturalHeight,br=r.width/r.height;
-        let ix,iy,iw,ih;
-        if(ir>=br){iw=r.width;ih=r.width/ir;ix=r.left;iy=r.top+(r.height-ih)/2;}
-        else{ih=r.height;iw=r.height*ir;iy=r.top;ix=r.left+(r.width-iw)/2;}
-        const x=(e.clientX-ix)/iw,y=(e.clientY-iy)/ih;
-        return(x<0||x>1||y<0||y>1)?null:{x,y};
-      }
+      function sendControl(msg){if(ws&&ws.readyState===WebSocket.OPEN&&watchingId)ws.send(JSON.stringify({type:"control",...msg}));}
+      function releaseModifiers(){for(const c of["ShiftLeft","ShiftRight","ControlLeft","ControlRight","AltLeft","AltRight","MetaLeft","MetaRight"])sendControl({event:"keyup",code:c});}
+      function stopControl(){if(!controlActive)return;releaseModifiers();controlActive=false;$ctrlBtn.className="ctrl-btn show";$ctrlBtn.textContent="Enable Control";$streamImg.classList.remove("controlling");document.removeEventListener("keydown",onKeyDown,true);document.removeEventListener("keyup",onKeyUp,true);}
+      function toggleControl(){if(controlActive){stopControl();return;}controlActive=true;$ctrlBtn.className="ctrl-btn show on";$ctrlBtn.textContent="Disable Control";$streamImg.classList.add("controlling");document.addEventListener("keydown",onKeyDown,true);document.addEventListener("keyup",onKeyUp,true);}
+      function imgCoords(e){if(!$streamImg.naturalWidth)return null;const r=$streamImg.getBoundingClientRect(),ir=$streamImg.naturalWidth/$streamImg.naturalHeight,br=r.width/r.height;let ix,iy,iw,ih;if(ir>=br){iw=r.width;ih=r.width/ir;ix=r.left;iy=r.top+(r.height-ih)/2;}else{ih=r.height;iw=r.height*ir;iy=r.top;ix=r.left+(r.width-iw)/2;}const x=(e.clientX-ix)/iw,y=(e.clientY-iy)/ih;return(x<0||x>1||y<0||y>1)?null:{x,y};}
       $streamImg.addEventListener("mousemove",e=>{if(!controlActive)return;const now=Date.now();if(now-lastMouseSend<33)return;lastMouseSend=now;const c=imgCoords(e);if(c)sendControl({event:"mousemove",...c});});
       $streamImg.addEventListener("mousedown",e=>{if(!controlActive)return;e.preventDefault();const c=imgCoords(e);if(!c)return;sendControl({event:"mousemove",...c});sendControl({event:"mousedown",button:e.button,...c});});
       $streamImg.addEventListener("mouseup",e=>{if(!controlActive)return;e.preventDefault();const c=imgCoords(e);sendControl({event:"mouseup",button:e.button,...(c||{})});});
@@ -385,37 +421,18 @@
       function onKeyUp(e){e.preventDefault();e.stopPropagation();sendControl({event:"keyup",code:e.code});}
 
       // ── File Explorer ─────────────────────────────────────────
-      function fsSend(op,params={}) {
-        return new Promise((resolve,reject)=>{
-          const id=++feReqId,timer=setTimeout(()=>{fePending.delete(id);reject(new Error("Timed out"));},20000);
-          fePending.set(id,{resolve,reject,timer});
-          if(ws&&ws.readyState===WebSocket.OPEN&&watchingId) ws.send(JSON.stringify({type:"fs_req",id,op,...params}));
-          else{clearTimeout(timer);fePending.delete(id);reject(new Error("Not connected"));}
-        });
-      }
-      function handleFsRes(m) { const r=fePending.get(m.id); if(!r)return; clearTimeout(r.timer); fePending.delete(m.id); m.error?r.reject(new Error(m.error)):r.resolve(m); }
-
-      async function feNavigate(path) {
-        feSetState("Loading…");
-        try { const r=await fsSend("list",path?{path}:{}); fePath=r.path;feParent=r.parent;feEntries=r.entries; document.getElementById("fe-path-text").textContent=fePath; document.getElementById("fe-up-btn").disabled=!feParent; feRender(); }
-        catch(err){feSetState(err.message,true);}
-      }
+      function fsSend(op,params={}){return new Promise((resolve,reject)=>{const id=++feReqId,timer=setTimeout(()=>{fePending.delete(id);reject(new Error("Timed out"));},20000);fePending.set(id,{resolve,reject,timer});if(ws&&ws.readyState===WebSocket.OPEN&&watchingId)ws.send(JSON.stringify({type:"fs_req",id,op,...params}));else{clearTimeout(timer);fePending.delete(id);reject(new Error("Not connected"));}});}
+      function handleFsRes(m){const r=fePending.get(m.id);if(!r)return;clearTimeout(r.timer);fePending.delete(m.id);m.error?r.reject(new Error(m.error)):r.resolve(m);}
+      async function feNavigate(path){feSetState("Loading…");try{const r=await fsSend("list",path?{path}:{});fePath=r.path;feParent=r.parent;feEntries=r.entries;document.getElementById("fe-path-text").textContent=fePath;document.getElementById("fe-up-btn").disabled=!feParent;feRender();}catch(err){feSetState(err.message,true);}}
       function feRefresh(){if(fePath)feNavigate(fePath);}
       function feUp(){if(feParent)feNavigate(feParent);}
       const TEXT_EXTS=new Set(["txt","md","json","js","ts","jsx","tsx","py","css","html","htm","xml","yaml","yml","csv","log","sh","bat","ps1","env","toml","ini","cfg","conf","rs","go","java","c","cpp","h","rb","php","sql","vue","svelte","gitignore","gitattributes","editorconfig"]);
       const isText=name=>{const e=name.split(".").pop().toLowerCase();return TEXT_EXTS.has(e);};
       function fileIcon(name){const e=name.split(".").pop().toLowerCase();if(["jpg","jpeg","png","gif","webp","svg","bmp"].includes(e))return"🖼️";if(["mp4","mov","avi","mkv","webm"].includes(e))return"🎬";if(["mp3","wav","ogg","flac","aac"].includes(e))return"🎵";if(["zip","rar","7z","tar","gz","bz2"].includes(e))return"📦";if(e==="pdf")return"📄";if(["exe","msi","dmg"].includes(e))return"⚙️";if(TEXT_EXTS.has(e))return"📝";return"📄";}
       function feSetState(msg,isError=false){document.getElementById("fe-body").innerHTML=`<div class="fe-state${isError?" error":""}">${esc(msg)}</div>`;}
-      function feRender() {
+      function feRender(){
         if(!feEntries.length){feSetState("This folder is empty.");return;}
-        const rows=feEntries.map(e=>{
-          const isDir=e.isDir,icon=isDir?"📁":fileIcon(e.name);
-          const rowClass=isDir?' class="fe-dir"':'';
-          const nameCell=`<div class="fe-row-name"${rowClass} data-fe-nav="${esc(e.path)}"><span class="fe-icon">${icon}</span><span class="fe-fname">${esc(e.name)}</span></div>`;
-          let acts=`<button class="fe-btn del" data-fe-del="${esc(e.path)}" data-fe-name="${esc(e.name)}" data-fe-isdir="${isDir}">Delete</button>`;
-          if(!isDir) acts=`<button class="fe-btn" data-fe-dl="${esc(e.path)}" data-fe-name="${esc(e.name)}">Download</button>`+(isText(e.name)?`<button class="fe-btn" data-fe-edit="${esc(e.path)}" data-fe-name="${esc(e.name)}">Edit</button>`:"")+acts;
-          return`<tr><td>${nameCell}</td><td class="fe-size">${fmtSize(e.size)}</td><td class="fe-date">${fmtDate(e.modified)}</td><td><div class="fe-actions">${acts}</div></td></tr>`;
-        }).join("");
+        const rows=feEntries.map(e=>{const isDir=e.isDir,icon=isDir?"📁":fileIcon(e.name);const rowClass=isDir?' class="fe-dir"':'';const nameCell=`<div class="fe-row-name"${rowClass} data-fe-nav="${esc(e.path)}"><span class="fe-icon">${icon}</span><span class="fe-fname">${esc(e.name)}</span></div>`;let acts=`<button class="fe-btn del" data-fe-del="${esc(e.path)}" data-fe-name="${esc(e.name)}" data-fe-isdir="${isDir}">Delete</button>`;if(!isDir)acts=`<button class="fe-btn" data-fe-dl="${esc(e.path)}" data-fe-name="${esc(e.name)}">Download</button>`+(isText(e.name)?`<button class="fe-btn" data-fe-edit="${esc(e.path)}" data-fe-name="${esc(e.name)}">Edit</button>`:"")+acts;return`<tr><td>${nameCell}</td><td class="fe-size">${fmtSize(e.size)}</td><td class="fe-date">${fmtDate(e.modified)}</td><td><div class="fe-actions">${acts}</div></td></tr>`;}).join("");
         const body=document.getElementById("fe-body");
         body.innerHTML=`<table class="fe-table"><thead><tr><th>Name</th><th>Size</th><th>Modified</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
         body.querySelectorAll("[data-fe-nav]").forEach(el=>el.addEventListener("click",()=>feNavigate(el.dataset.feNav)));
@@ -439,114 +456,95 @@
       document.getElementById("fe-modal-textarea").addEventListener("keydown",e=>{if(e.ctrlKey&&e.code==="KeyS"){e.preventDefault();saveEditModal();}});
 
       // ── Terminal ──────────────────────────────────────────────
-      const stripAnsi = s => s.replace(/\x1b\[[0-9;]*[mGKHFABCDJst]/g,"").replace(/\x1b\][^\x07]*\x07/g,"");
-
-      function termKeyDown(e) {
-        if(e.key==="Enter"){termRun();return;}
-        if(e.key==="ArrowUp"){e.preventDefault();if(termHistIdx<termHistory.length-1){termHistIdx++;$termInput.value=termHistory[termHistIdx];setTimeout(()=>$termInput.setSelectionRange($termInput.value.length,$termInput.value.length),0);}return;}
-        if(e.key==="ArrowDown"){e.preventDefault();if(termHistIdx>0){termHistIdx--;$termInput.value=termHistory[termHistIdx];}else if(termHistIdx===0){termHistIdx=-1;$termInput.value="";}return;}
-        if(e.key==="Escape"){$termInput.value="";termHistIdx=-1;}
-      }
-
-      function termRun() {
-        const cmd=$termInput.value.trim();
-        if(!cmd||termRunning||!watchingId)return;
-        $termInput.value="";
-        termHistory.unshift(cmd);if(termHistory.length>100)termHistory.pop();termHistIdx=-1;
+      const stripAnsi=s=>s.replace(/\x1b\[[0-9;]*[mGKHFABCDJst]/g,"").replace(/\x1b\][^\x07]*\x07/g,"");
+      function termKeyDown(e){if(e.key==="Enter"){termRun();return;}if(e.key==="ArrowUp"){e.preventDefault();if(termHistIdx<termHistory.length-1){termHistIdx++;$termInput.value=termHistory[termHistIdx];setTimeout(()=>$termInput.setSelectionRange($termInput.value.length,$termInput.value.length),0);}return;}if(e.key==="ArrowDown"){e.preventDefault();if(termHistIdx>0){termHistIdx--;$termInput.value=termHistory[termHistIdx];}else if(termHistIdx===0){termHistIdx=-1;$termInput.value="";}return;}if(e.key==="Escape"){$termInput.value="";termHistIdx=-1;}}
+      function termRun(){
+        const cmd=$termInput.value.trim();if(!cmd||termRunning||!watchingId)return;
+        $termInput.value="";termHistory.unshift(cmd);if(termHistory.length>100)termHistory.pop();termHistIdx=-1;
         termRunning=true;$termRunBtn.disabled=true;$termInput.disabled=true;
-
-        // Build block
-        const block=document.createElement("div"); block.className="term-block";
-        const cmdLine=document.createElement("div"); cmdLine.className="term-cmd-line"; cmdLine.textContent=cmd;
+        const block=document.createElement("div");block.className="term-block";
+        const cmdLine=document.createElement("div");cmdLine.className="term-cmd-line";cmdLine.textContent=cmd;
         const lines=document.createElement("div");
-        const running=document.createElement("div"); running.className="term-running"; running.textContent="running…";
-        block.appendChild(cmdLine); block.appendChild(lines); block.appendChild(running);
-        $termOutput.appendChild(block);
-        $termOutput.scrollTop=$termOutput.scrollHeight;
-
+        const running=document.createElement("div");running.className="term-running";running.textContent="running…";
+        block.appendChild(cmdLine);block.appendChild(lines);block.appendChild(running);
+        $termOutput.appendChild(block);$termOutput.scrollTop=$termOutput.scrollHeight;
         const id=++termReqId;
         const timer=setTimeout(()=>termFinish(id,-1,"Command timed out (60s)"),65000);
         termPending.set(id,{block,lines,running,timer});
-
-        if(ws&&ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:"exec_req",id,command:cmd}));
+        if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:"exec_req",id,command:cmd}));
         else termFinish(id,-1,"Not connected to device");
       }
-
-      function termFinish(id,exitCode,errMsg) {
-        const req=termPending.get(id); if(!req)return;
-        clearTimeout(req.timer); termPending.delete(id);
-        req.running.remove();
+      function termFinish(id,exitCode,errMsg){
+        const req=termPending.get(id);if(!req)return;
+        clearTimeout(req.timer);termPending.delete(id);req.running.remove();
         if(errMsg){const el=document.createElement("div");el.className="term-stderr";el.textContent=errMsg;req.lines.appendChild(el);}
-        const doneEl=document.createElement("div");
-        doneEl.className=`term-exit ${exitCode===0?"ok":"fail"}`;
-        doneEl.textContent=`exit ${exitCode}`;
-        req.block.appendChild(doneEl);
+        const doneEl=document.createElement("div");doneEl.className=`term-exit ${exitCode===0?"ok":"fail"}`;doneEl.textContent=`exit ${exitCode}`;req.block.appendChild(doneEl);
         $termOutput.scrollTop=$termOutput.scrollHeight;
         termRunning=false;$termRunBtn.disabled=false;$termInput.disabled=false;$termInput.focus();
       }
-
-      function handleExecRes(m) {
-        const req=termPending.get(m.id); if(!req)return;
-        if(m.output!==undefined) {
-          const text=stripAnsi(m.output).replace(/\r?\n$/,"");
-          const el=document.createElement("div");
-          el.className=m.stream==="stderr"?"term-stderr":"term-stdout";
-          el.textContent=text||""; // empty string = blank line (div still takes space via line-height)
-          req.lines.appendChild(el);
-          $termOutput.scrollTop=$termOutput.scrollHeight;
-        }
-        if(m.done) termFinish(m.id,m.exitCode??0);
+      function handleExecRes(m){
+        const req=termPending.get(m.id);if(!req)return;
+        if(m.output!==undefined){const text=stripAnsi(m.output).replace(/\r?\n$/,"");const el=document.createElement("div");el.className=m.stream==="stderr"?"term-stderr":"term-stdout";el.textContent=text;req.lines.appendChild(el);$termOutput.scrollTop=$termOutput.scrollHeight;}
+        if(m.done)termFinish(m.id,m.exitCode??0);
       }
-
-      function termClear() {
-        for(const[id,req]of termPending){clearTimeout(req.timer);termPending.delete(id);}
-        termRunning=false;$termRunBtn.disabled=false;$termInput.disabled=false;
-        $termOutput.innerHTML="";
-      }
+      function termClear(){for(const[id,req]of termPending){clearTimeout(req.timer);termPending.delete(id);}termRunning=false;$termRunBtn.disabled=false;$termInput.disabled=false;$termOutput.innerHTML="";}
 
       // ── WebSocket ─────────────────────────────────────────────
       function connect() {
-        const proto=location.protocol==="https:"?"wss":"ws";
-        ws=new WebSocket(`${proto}://${location.host}/?role=viewer`);
-        ws.binaryType="blob";
+        const proto = location.protocol === "https:" ? "wss" : "ws";
+        const url   = `${proto}://${location.host}/?role=viewer&password=${encodeURIComponent(viewerPassword)}`;
+        ws = new WebSocket(url);
+        ws.binaryType = "blob";
 
-        ws.onopen=()=>{
-          $connDot.classList.add("ok");$connLabel.textContent="Connected";
-          if(watchingId&&devices[watchingId]) ws.send(JSON.stringify({type:"watch",id:watchingId}));
+        ws.onopen = () => {
+          hideLogin();
+          $connDot.classList.add("ok"); $connLabel.textContent = "Connected";
+          if (watchingId && devices[watchingId]) ws.send(JSON.stringify({type:"watch",id:watchingId}));
         };
 
-        ws.onmessage=(event)=>{
-          if(typeof event.data!=="string"){
-            if(watchingId){const next=URL.createObjectURL(event.data);$streamImg.onload=()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=next;};$streamImg.src=next;$streamImg.style.display="block";$overlayMsg.className="overlay-msg";setBadge("live");}
+        ws.onmessage = (event) => {
+          if (typeof event.data !== "string") {
+            if (watchingId) { const next=URL.createObjectURL(event.data);$streamImg.onload=()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=next;};$streamImg.src=next;$streamImg.style.display="block";$overlayMsg.className="overlay-msg";setBadge("live"); }
             return;
           }
           try {
-            const m=JSON.parse(event.data);
-            if(m.type==="agents"){
-              devices={};for(const a of m.list)devices[a.id]=a;
-              const n=m.list.length;$connLabel.textContent=`${n} device${n!==1?"s":""} online`;
-              if(watchingId&&!devices[watchingId])showHome();
-              else{renderSidebar();if(!watchingId)renderHome();}
-            } else if(m.type==="agent_offline"){
+            const m = JSON.parse(event.data);
+            if (m.type === "agents") {
+              devices = {}; for (const a of m.list) devices[a.id] = a;
+              const n = m.list.length; $connLabel.textContent = `${n} device${n!==1?"s":""} online`;
+              if (watchingId && !devices[watchingId]) showHome();
+              else { renderSidebar(); if (!watchingId) renderHome(); }
+            } else if (m.type === "agent_offline") {
               delete devices[m.id];
-              if(watchingId===m.id){stopControl();$overlayMsg.className="overlay-msg show";$overlayMsg.textContent="Device disconnected.";$streamImg.style.display="none";setBadge("waiting");}
-              renderSidebar();if(!watchingId)renderHome();
-              const n=Object.keys(devices).length;$connLabel.textContent=`${n} device${n!==1?"s":""} online`;
-            } else if(m.type==="fs_res"){
-              handleFsRes(m);
-            } else if(m.type==="exec_res"){
-              handleExecRes(m);
-            }
-          } catch(_){}
+              if (watchingId === m.id) { stopControl(); $overlayMsg.className="overlay-msg show"; $overlayMsg.textContent="Device disconnected."; $streamImg.style.display="none"; setBadge("waiting"); }
+              renderSidebar(); if (!watchingId) renderHome();
+              const n=Object.keys(devices).length; $connLabel.textContent=`${n} device${n!==1?"s":""} online`;
+            } else if (m.type === "fs_res")   { handleFsRes(m); }
+              else if (m.type === "exec_res") { handleExecRes(m); }
+          } catch(_) {}
         };
 
-        ws.onclose=()=>{$connDot.classList.remove("ok");$connLabel.textContent="Reconnecting…";$badge.className="badge";setTimeout(connect,3000);};
-        ws.onerror=()=>{$connLabel.textContent="Connection error";};
+        ws.onclose = (event) => {
+          if (event.code === 1008) {
+            // Wrong password — clear stored value and show login
+            localStorage.removeItem("pgratzd_pw");
+            viewerPassword = "";
+            showLogin("Wrong password. Try again.");
+            return;
+          }
+          $connDot.classList.remove("ok"); $connLabel.textContent = "Reconnecting…";
+          $badge.className = "badge";
+          setTimeout(connect, 3000);
+        };
+
+        ws.onerror = () => { $connLabel.textContent = "Connection error"; };
       }
 
       setInterval(()=>{renderSidebar();if(!watchingId)renderHome();},15000);
       showHome();
-      connect();
+
+      // Auto-connect if we have a stored password; otherwise show login
+      if (viewerPassword) { connect(); } else { showLogin(); }
     </script>
   </body>
 </html>
