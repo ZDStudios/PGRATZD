@@ -16,174 +16,152 @@
         overflow: hidden;
       }
 
-      /* ── Sidebar ── */
+      /* ── Sidebar ────────────────────────────────── */
       aside {
-        width: 230px;
-        flex-shrink: 0;
+        width: 230px; flex-shrink: 0;
         background: #13161b;
         border-right: 1px solid #1e2229;
-        display: flex;
-        flex-direction: column;
+        display: flex; flex-direction: column;
       }
-      .sidebar-top {
-        padding: 18px 16px 12px;
-        border-bottom: 1px solid #1e2229;
-      }
-      .logo {
-        font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #e6e8eb;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
+      .sidebar-top { padding: 18px 16px 12px; border-bottom: 1px solid #1e2229; }
+      .logo { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
       .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #2f6fed; }
-      .section-label {
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: #4b5563;
-        padding: 14px 16px 6px;
-      }
+      .section-label { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #4b5563; padding: 14px 16px 6px; }
       .device-list { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
-      .device-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 9px 10px;
-        border-radius: 7px;
-        cursor: pointer;
-        transition: background 0.12s;
-        margin-bottom: 1px;
-        user-select: none;
-      }
+      .device-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 7px; cursor: pointer; transition: background .12s; margin-bottom: 1px; user-select: none; }
       .device-item:hover { background: #1a1e25; }
       .device-item.active { background: #162035; }
       .device-item.active .device-name { color: #60a5fa; }
-      .live-dot {
-        width: 7px; height: 7px;
-        border-radius: 50%;
-        background: #22c55e;
-        box-shadow: 0 0 5px #22c55e99;
-        flex-shrink: 0;
-      }
+      .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 5px #22c55e99; flex-shrink: 0; }
       .device-info { flex: 1; min-width: 0; }
       .device-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .device-meta { font-size: 11px; color: #6b7280; margin-top: 1px; }
       .no-devices { padding: 24px 16px; font-size: 12px; color: #4b5563; text-align: center; line-height: 1.7; }
       .no-devices code { font-size: 11px; background: #1e2229; padding: 1px 5px; border-radius: 3px; color: #9ca3af; }
-      .sidebar-footer {
-        padding: 10px 14px;
-        border-top: 1px solid #1e2229;
-        font-size: 11px;
-        color: #4b5563;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .conn-dot { width: 6px; height: 6px; border-radius: 50%; background: #4b5563; flex-shrink: 0; transition: background 0.3s; }
+      .sidebar-footer { padding: 10px 14px; border-top: 1px solid #1e2229; font-size: 11px; color: #4b5563; display: flex; align-items: center; gap: 6px; }
+      .conn-dot { width: 6px; height: 6px; border-radius: 50%; background: #4b5563; flex-shrink: 0; transition: background .3s; }
       .conn-dot.ok { background: #22c55e; }
 
-      /* ── Main ── */
+      /* ── Main ───────────────────────────────────── */
       main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-      .topbar {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        background: #13161b;
-        border-bottom: 1px solid #1e2229;
-        flex-shrink: 0;
-      }
-      .back-btn {
-        font-size: 12px;
-        color: #6b7280;
-        cursor: pointer;
-        padding: 4px 8px;
-        border-radius: 5px;
-        transition: background 0.12s, color 0.12s;
-        display: none;
-        user-select: none;
-      }
+      .topbar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: #13161b; border-bottom: 1px solid #1e2229; flex-shrink: 0; }
+      .back-btn { font-size: 12px; color: #6b7280; cursor: pointer; padding: 4px 8px; border-radius: 5px; transition: background .12s, color .12s; display: none; user-select: none; }
       .back-btn:hover { background: #1e2229; color: #e6e8eb; }
       .back-btn.show { display: inline; }
       .topbar-title { font-size: 14px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .badge { font-size: 10px; font-weight: 700; letter-spacing: 0.07em; padding: 3px 8px; border-radius: 5px; display: none; }
+
+      /* Tabs */
+      .tab-group { display: none; gap: 2px; background: #0d0f12; padding: 3px; border-radius: 7px; }
+      .tab-group.show { display: flex; }
+      .tab-btn { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 5px; border: none; background: transparent; color: #6b7280; cursor: pointer; transition: background .12s, color .12s; user-select: none; }
+      .tab-btn:hover { color: #e6e8eb; }
+      .tab-btn.active { background: #1e2229; color: #e6e8eb; }
+
+      /* Badge & control button */
+      .badge { font-size: 10px; font-weight: 700; letter-spacing: .07em; padding: 3px 8px; border-radius: 5px; display: none; }
       .badge.live { background: #166534; color: #4ade80; display: inline; }
       .badge.waiting { background: #1e2229; color: #9ca3af; display: inline; }
-
-      /* Control toggle */
-      .ctrl-btn {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 5px 11px;
-        border-radius: 6px;
-        border: 1px solid #2a2f37;
-        background: #1a1e25;
-        color: #9ca3af;
-        cursor: pointer;
-        transition: all 0.15s;
-        display: none;
-        user-select: none;
-        letter-spacing: 0.02em;
-      }
+      .ctrl-btn { font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 6px; border: 1px solid #2a2f37; background: #1a1e25; color: #9ca3af; cursor: pointer; transition: all .15s; display: none; user-select: none; }
       .ctrl-btn:hover { border-color: #4b5563; color: #e6e8eb; }
       .ctrl-btn.show { display: inline; }
       .ctrl-btn.on { background: #450a0a; border-color: #ef4444; color: #fca5a5; }
       .ctrl-btn.on:hover { background: #7f1d1d; }
 
-      /* Content area */
-      .content { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 16px; position: relative; }
+      /* ── Content area ───────────────────────────── */
+      .content { flex: 1; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
 
-      #stream-img {
-        position: absolute;
-        top: 16px; left: 16px; right: 16px; bottom: 16px;
-        width: calc(100% - 32px);
-        height: calc(100% - 32px);
-        object-fit: contain;
-        border-radius: 8px;
-        border: 1px solid #1e2229;
-        display: none;
-        transition: border-color 0.2s;
-      }
-      #stream-img.controlling {
-        border-color: #ef4444;
-        cursor: crosshair;
-        box-shadow: 0 0 0 1px #ef444433;
-      }
-
-      .overlay-msg { font-size: 13px; color: #6b7280; text-align: center; display: none; }
-
-      /* Home dashboard */
-      #home { width: 100%; max-width: 740px; text-align: center; }
-      .home-title { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
+      /* Home */
+      #home { width: 100%; max-width: 740px; text-align: center; padding: 16px; }
+      .home-title { font-size: 32px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px; }
       .home-sub { font-size: 14px; color: #6b7280; margin-bottom: 36px; }
       .device-grid { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
-      .device-card {
-        background: #13161b;
-        border: 1px solid #1e2229;
-        border-radius: 12px;
-        padding: 18px 22px;
-        cursor: pointer;
-        transition: border-color 0.15s, background 0.15s, transform 0.1s;
-        min-width: 160px;
-        text-align: left;
-        user-select: none;
-      }
+      .device-card { background: #13161b; border: 1px solid #1e2229; border-radius: 12px; padding: 18px 22px; cursor: pointer; transition: border-color .15s, background .15s, transform .1s; min-width: 160px; text-align: left; user-select: none; }
       .device-card:hover { border-color: #2f6fed; background: #162035; transform: translateY(-1px); }
       .card-indicator { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
       .card-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e88; }
-      .card-live { font-size: 10px; font-weight: 700; color: #4ade80; letter-spacing: 0.06em; }
+      .card-live { font-size: 10px; font-weight: 700; color: #4ade80; letter-spacing: .06em; }
       .card-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
       .card-meta { font-size: 12px; color: #6b7280; }
       .empty-hint { color: #4b5563; font-size: 13px; line-height: 1.8; }
       .empty-hint code { font-size: 12px; background: #1e2229; padding: 2px 6px; border-radius: 4px; color: #9ca3af; }
+
+      /* Screen tab */
+      .view-tab { position: absolute; inset: 0; display: none; }
+      #screen-tab.active { display: block; }
+      #files-tab.active { display: flex; flex-direction: column; }
+
+      #stream-img {
+        position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px;
+        width: calc(100% - 24px); height: calc(100% - 24px);
+        object-fit: contain; border-radius: 8px; border: 1px solid #1e2229; display: none;
+        transition: border-color .2s;
+      }
+      #stream-img.controlling { border-color: #ef4444; cursor: crosshair; box-shadow: 0 0 0 1px #ef444433; }
+      .overlay-msg { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 13px; color: #6b7280; }
+      .overlay-msg.show { display: flex; }
+
+      /* ── File Explorer ──────────────────────────── */
+      .fe-toolbar {
+        display: flex; align-items: center; gap: 6px;
+        padding: 8px 14px; background: #13161b; border-bottom: 1px solid #1e2229;
+        flex-shrink: 0; flex-wrap: wrap;
+      }
+      .fe-nav-btn { font-size: 13px; padding: 4px 9px; border-radius: 5px; border: 1px solid #2a2f37; background: #1a1e25; color: #9ca3af; cursor: pointer; transition: all .12s; white-space: nowrap; }
+      .fe-nav-btn:hover:not(:disabled) { border-color: #4b5563; color: #e6e8eb; }
+      .fe-nav-btn:disabled { opacity: .35; cursor: default; }
+      .fe-path-text { flex: 1; font-size: 12px; color: #6b7280; font-family: Consolas, 'Cascadia Code', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 60px; }
+      .fe-act-btn { font-size: 12px; padding: 4px 10px; border-radius: 5px; border: 1px solid #2a2f37; background: #1a1e25; color: #9ca3af; cursor: pointer; transition: all .12s; white-space: nowrap; }
+      .fe-act-btn:hover { border-color: #4b5563; color: #e6e8eb; }
+      .fe-act-btn.primary { background: #1a2540; border-color: #2f6fed; color: #60a5fa; }
+      .fe-act-btn.primary:hover { background: #162035; border-color: #4480f5; color: #93c5fd; }
+
+      .fe-body { flex: 1; overflow-y: auto; }
+      .fe-state { padding: 40px 20px; text-align: center; font-size: 13px; color: #6b7280; }
+      .fe-state.error { color: #f87171; }
+
+      .fe-table { width: 100%; border-collapse: collapse; }
+      .fe-table th { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #4b5563; text-align: left; padding: 6px 14px; border-bottom: 1px solid #1e2229; white-space: nowrap; }
+      .fe-table td { padding: 6px 14px; font-size: 13px; vertical-align: middle; border-bottom: 1px solid #13161b; }
+      .fe-table tr:hover td { background: #13161b; }
+      .fe-table tr:last-child td { border-bottom: none; }
+      .fe-row-name { display: flex; align-items: center; gap: 8px; }
+      .fe-icon { font-size: 15px; flex-shrink: 0; }
+      .fe-fname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; }
+      .fe-dir .fe-fname { color: #60a5fa; }
+      .fe-dir { cursor: pointer; }
+      .fe-dir:hover .fe-fname { text-decoration: underline; }
+      .fe-size { color: #9ca3af; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .fe-date { color: #6b7280; font-size: 12px; white-space: nowrap; }
+      .fe-actions { display: flex; align-items: center; gap: 3px; justify-content: flex-end; }
+      .fe-btn { font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid transparent; background: transparent; color: #6b7280; cursor: pointer; white-space: nowrap; transition: all .1s; }
+      .fe-btn:hover { border-color: #2a2f37; color: #e6e8eb; background: #1a1e25; }
+      .fe-btn.del:hover { border-color: #7f1d1d; color: #f87171; background: #450a0a; }
+
+      .fe-statusbar { padding: 5px 14px; border-top: 1px solid #1e2229; flex-shrink: 0; min-height: 26px; }
+      .fe-status { font-size: 11px; color: #6b7280; }
+      .fe-status.ok { color: #4ade80; }
+      .fe-status.error { color: #f87171; }
+
+      /* ── Edit Modal ─────────────────────────────── */
+      .fe-modal-overlay { position: fixed; inset: 0; background: #000000bb; display: none; align-items: center; justify-content: center; z-index: 200; }
+      .fe-modal-overlay.open { display: flex; }
+      .fe-modal-bg { position: absolute; inset: 0; }
+      .fe-modal { position: relative; background: #13161b; border: 1px solid #262b33; border-radius: 12px; width: min(860px, 92vw); height: min(620px, 85vh); display: flex; flex-direction: column; overflow: hidden; }
+      .fe-modal-header { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid #1e2229; flex-shrink: 0; }
+      .fe-modal-title { flex: 1; font-size: 13px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: Consolas, monospace; color: #9ca3af; }
+      .fe-modal-close { background: none; border: none; color: #6b7280; font-size: 16px; cursor: pointer; padding: 2px 7px; border-radius: 4px; line-height: 1; }
+      .fe-modal-close:hover { color: #e6e8eb; background: #1e2229; }
+      .fe-modal-body { flex: 1; overflow: hidden; }
+      #fe-modal-textarea { width: 100%; height: 100%; background: #0d0f12; border: none; color: #e6e8eb; font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace; font-size: 13px; line-height: 1.65; padding: 16px 18px; resize: none; outline: none; tab-size: 4; }
+      .fe-modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 18px; border-top: 1px solid #1e2229; flex-shrink: 0; }
+      .fe-modal-save { padding: 6px 18px; border-radius: 6px; border: none; background: #2f6fed; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; }
+      .fe-modal-save:hover { background: #4480f5; }
+      .fe-modal-cancel { padding: 6px 14px; border-radius: 6px; border: 1px solid #2a2f37; background: transparent; color: #9ca3af; font-size: 13px; cursor: pointer; }
+      .fe-modal-cancel:hover { border-color: #4b5563; color: #e6e8eb; }
     </style>
   </head>
   <body>
+    <!-- ── Sidebar ── -->
     <aside>
       <div class="sidebar-top">
         <div class="logo"><div class="logo-dot"></div>Screen Stream</div>
@@ -191,7 +169,7 @@
       <div class="section-label">Devices</div>
       <div class="device-list" id="device-list">
         <div class="no-devices" id="no-devices">
-          No devices online.<br>Run <code>agent.py</code> on a machine to see it here.
+          No devices online.<br>Run <code>agent.py</code> on a machine.
         </div>
       </div>
       <div class="sidebar-footer">
@@ -200,14 +178,21 @@
       </div>
     </aside>
 
+    <!-- ── Main ── -->
     <main>
       <div class="topbar">
         <span class="back-btn" id="back-btn" onclick="showHome()">&#8592; Home</span>
         <div class="topbar-title" id="topbar-title">Screen Stream</div>
+        <div class="tab-group" id="tab-group">
+          <button class="tab-btn active" data-tab="screen" onclick="switchTab('screen')">Screen</button>
+          <button class="tab-btn" data-tab="files" onclick="switchTab('files')">Files</button>
+        </div>
         <button class="ctrl-btn" id="ctrl-btn" onclick="toggleControl()">Enable Control</button>
         <span class="badge" id="badge"></span>
       </div>
+
       <div class="content">
+        <!-- Home dashboard -->
         <div id="home">
           <div class="home-title">Screen Stream</div>
           <div class="home-sub" id="home-sub">Waiting for devices to connect…</div>
@@ -215,12 +200,53 @@
             <div class="empty-hint">Start <code>agent.py</code> on any machine<br>and it will appear here automatically.</div>
           </div>
         </div>
-        <img id="stream-img" alt="remote screen" draggable="false" />
-        <div class="overlay-msg" id="overlay-msg"></div>
+
+        <!-- Screen tab -->
+        <div class="view-tab" id="screen-tab">
+          <img id="stream-img" alt="remote screen" draggable="false" />
+          <div class="overlay-msg" id="overlay-msg"></div>
+        </div>
+
+        <!-- Files tab -->
+        <div class="view-tab" id="files-tab">
+          <div class="fe-toolbar">
+            <button class="fe-nav-btn" id="fe-up-btn" title="Go up" onclick="feUp()">↑ Up</button>
+            <button class="fe-nav-btn" title="Home directory" onclick="feNavigate(null)">🏠</button>
+            <span class="fe-path-text" id="fe-path-text">—</span>
+            <button class="fe-nav-btn" title="Refresh" onclick="feRefresh()">↺</button>
+            <button class="fe-act-btn" onclick="feNewFile()">+ File</button>
+            <button class="fe-act-btn" onclick="feNewFolder()">+ Folder</button>
+            <button class="fe-act-btn primary" onclick="feUploadClick()">↑ Upload</button>
+            <input type="file" id="fe-upload-input" multiple style="display:none" onchange="handleUpload(event)" />
+          </div>
+          <div class="fe-body" id="fe-body">
+            <div class="fe-state">Select a device and open the Files tab to browse.</div>
+          </div>
+          <div class="fe-statusbar"><span class="fe-status" id="fe-status"></span></div>
+        </div>
       </div>
     </main>
 
+    <!-- ── Edit Modal ── -->
+    <div class="fe-modal-overlay" id="fe-modal-overlay">
+      <div class="fe-modal-bg" onclick="closeEditModal()"></div>
+      <div class="fe-modal">
+        <div class="fe-modal-header">
+          <span class="fe-modal-title" id="fe-modal-title">Edit</span>
+          <button class="fe-modal-close" onclick="closeEditModal()">✕</button>
+        </div>
+        <div class="fe-modal-body">
+          <textarea id="fe-modal-textarea" spellcheck="false"></textarea>
+        </div>
+        <div class="fe-modal-footer">
+          <button class="fe-modal-cancel" onclick="closeEditModal()">Cancel</button>
+          <button class="fe-modal-save" onclick="saveEditModal()">Save</button>
+        </div>
+      </div>
+    </div>
+
     <script>
+      // ── DOM refs ──────────────────────────────────────────────
       const $deviceList  = document.getElementById("device-list");
       const $noDevices   = document.getElementById("no-devices");
       const $deviceGrid  = document.getElementById("device-grid");
@@ -234,50 +260,81 @@
       const $connDot     = document.getElementById("conn-dot");
       const $connLabel   = document.getElementById("conn-label");
       const $ctrlBtn     = document.getElementById("ctrl-btn");
+      const $tabGroup    = document.getElementById("tab-group");
+      const $screenTab   = document.getElementById("screen-tab");
+      const $filesTab    = document.getElementById("files-tab");
 
+      // ── State ─────────────────────────────────────────────────
       let ws = null;
       let devices = {};
       let watchingId = null;
       let currentUrl = null;
+      let activeTab = "screen";
       let controlActive = false;
       let lastMouseSend = 0;
-      const MOUSE_HZ = 30;
 
-      // ── Helpers ──────────────────────────────────────────────
+      // File explorer state
+      let fePath = null;
+      let feParent = null;
+      let feEntries = [];
+      let feReqId = 0;
+      const fePending = new Map();
 
+      // ── Utilities ─────────────────────────────────────────────
       function esc(s) {
         return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
       }
-
       function timeAgo(ts) {
         const s = Math.floor((Date.now() - ts) / 1000);
-        if (s < 60) return `${s}s`;
-        if (s < 3600) return `${Math.floor(s / 60)}m`;
-        return `${Math.floor(s / 3600)}h`;
+        return s < 60 ? `${s}s` : s < 3600 ? `${Math.floor(s/60)}m` : `${Math.floor(s/3600)}h`;
       }
-
+      function fmtSize(b) {
+        if (b == null) return "—";
+        if (b < 1024) return `${b} B`;
+        if (b < 1048576) return `${(b/1024).toFixed(1)} KB`;
+        if (b < 1073741824) return `${(b/1048576).toFixed(1)} MB`;
+        return `${(b/1073741824).toFixed(1)} GB`;
+      }
+      function fmtDate(ms) {
+        if (!ms) return "—";
+        return new Date(ms).toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" });
+      }
+      function joinPath(base, name) {
+        const sep = base.includes("\\") ? "\\" : "/";
+        return base.endsWith(sep) ? base + name : base + sep + name;
+      }
       function setBadge(state) {
         $badge.className = "badge";
         if (state === "live")    { $badge.classList.add("live");    $badge.textContent = "LIVE"; }
         if (state === "waiting") { $badge.classList.add("waiting"); $badge.textContent = "Waiting…"; }
       }
 
-      // ── Sidebar ───────────────────────────────────────────────
+      // Base64 helpers safe for large files
+      function uint8ToB64(bytes) {
+        let s = "", c = 8192;
+        for (let i = 0; i < bytes.length; i += c)
+          s += String.fromCharCode(...bytes.subarray(i, i + c));
+        return btoa(s);
+      }
+      function b64ToUint8(b64) {
+        const bin = atob(b64);
+        const out = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+        return out;
+      }
 
+      // ── Sidebar ───────────────────────────────────────────────
       function renderSidebar() {
         const ids = Object.keys(devices);
         $noDevices.style.display = ids.length ? "none" : "block";
         const existing = new Set([...$deviceList.querySelectorAll(".device-item")].map(el => el.dataset.id));
-        for (const id of existing) {
-          if (!devices[id]) $deviceList.querySelector(`[data-id="${id}"]`).remove();
-        }
+        for (const id of existing) if (!devices[id]) $deviceList.querySelector(`[data-id="${id}"]`).remove();
         for (const id of ids) {
           const d = devices[id];
           let el = $deviceList.querySelector(`[data-id="${id}"]`);
           if (!el) {
             el = document.createElement("div");
-            el.className = "device-item";
-            el.dataset.id = id;
+            el.className = "device-item"; el.dataset.id = id;
             el.innerHTML = `<div class="live-dot"></div><div class="device-info"><div class="device-name"></div><div class="device-meta"></div></div>`;
             el.addEventListener("click", () => watchDevice(id));
             $deviceList.appendChild(el);
@@ -287,7 +344,6 @@
           el.classList.toggle("active", id === watchingId);
         }
       }
-
       function renderHome() {
         const ids = Object.keys(devices);
         if (!ids.length) {
@@ -297,7 +353,7 @@
           $homeSub.textContent = `${ids.length} device${ids.length > 1 ? "s" : ""} online — click one to view`;
           $deviceGrid.innerHTML = ids.map(id => {
             const d = devices[id];
-            return `<div class="device-card" data-id="${id}">
+            return `<div class="device-card" data-id="${esc(id)}">
               <div class="card-indicator"><div class="card-dot"></div><span class="card-live">LIVE</span></div>
               <div class="card-name">${esc(d.name)}</div>
               <div class="card-meta">Connected ${timeAgo(d.connectedAt)} ago</div>
@@ -310,213 +366,356 @@
       }
 
       // ── Navigation ────────────────────────────────────────────
-
       function showHome() {
         stopControl();
-        watchingId = null;
+        watchingId = null; fePath = null; activeTab = "screen";
         $home.style.display = "block";
-        $streamImg.style.display = "none";
-        $overlayMsg.style.display = "none";
+        $screenTab.classList.remove("active");
+        $filesTab.classList.remove("active");
+        $tabGroup.classList.remove("show");
         $topbarTitle.textContent = "Screen Stream";
         $badge.className = "badge";
         $backBtn.classList.remove("show");
         $ctrlBtn.classList.remove("show");
-        renderSidebar();
-        renderHome();
+        renderSidebar(); renderHome();
       }
 
       function watchDevice(id) {
         if (!devices[id]) return;
         stopControl();
-        watchingId = id;
+        watchingId = id; fePath = null; activeTab = "screen";
         $home.style.display = "none";
+        $screenTab.classList.add("active");
+        $filesTab.classList.remove("active");
+        $tabGroup.classList.add("show");
+        document.querySelectorAll(".tab-btn").forEach(el => el.classList.toggle("active", el.dataset.tab === "screen"));
+        $overlayMsg.className = "overlay-msg show"; $overlayMsg.textContent = "Waiting for first frame…";
         $streamImg.style.display = "none";
-        $overlayMsg.style.display = "block";
-        $overlayMsg.textContent = "Waiting for first frame…";
         $topbarTitle.textContent = devices[id].name;
         $backBtn.classList.add("show");
         $ctrlBtn.classList.add("show");
         setBadge("waiting");
         renderSidebar();
-        if (ws && ws.readyState === WebSocket.OPEN) {
+        if (ws && ws.readyState === WebSocket.OPEN)
           ws.send(JSON.stringify({ type: "watch", id }));
-        }
       }
 
-      // ── Control ───────────────────────────────────────────────
+      function switchTab(tab) {
+        activeTab = tab;
+        document.querySelectorAll(".tab-btn").forEach(el => el.classList.toggle("active", el.dataset.tab === tab));
+        $screenTab.classList.toggle("active", tab === "screen");
+        $filesTab.classList.toggle("active", tab === "files");
+        if (tab === "files" && watchingId && !fePath) feNavigate(null);
+      }
 
+      // ── Remote Control ────────────────────────────────────────
       function sendControl(msg) {
-        if (ws && ws.readyState === WebSocket.OPEN && watchingId) {
+        if (ws && ws.readyState === WebSocket.OPEN && watchingId)
           ws.send(JSON.stringify({ type: "control", ...msg }));
-        }
       }
-
       function releaseModifiers() {
-        for (const code of ["ShiftLeft","ShiftRight","ControlLeft","ControlRight","AltLeft","AltRight","MetaLeft","MetaRight"]) {
-          sendControl({ event: "keyup", code });
-        }
+        for (const c of ["ShiftLeft","ShiftRight","ControlLeft","ControlRight","AltLeft","AltRight","MetaLeft","MetaRight"])
+          sendControl({ event: "keyup", code: c });
       }
-
       function stopControl() {
         if (!controlActive) return;
-        releaseModifiers();
-        controlActive = false;
-        $ctrlBtn.className = "ctrl-btn show";
-        $ctrlBtn.textContent = "Enable Control";
+        releaseModifiers(); controlActive = false;
+        $ctrlBtn.className = "ctrl-btn show"; $ctrlBtn.textContent = "Enable Control";
         $streamImg.classList.remove("controlling");
         document.removeEventListener("keydown", onKeyDown, true);
         document.removeEventListener("keyup", onKeyUp, true);
       }
-
       function toggleControl() {
-        if (controlActive) {
-          stopControl();
-        } else {
-          controlActive = true;
-          $ctrlBtn.className = "ctrl-btn show on";
-          $ctrlBtn.textContent = "Disable Control";
-          $streamImg.classList.add("controlling");
-          document.addEventListener("keydown", onKeyDown, true);
-          document.addEventListener("keyup", onKeyUp, true);
-        }
+        if (controlActive) { stopControl(); return; }
+        controlActive = true;
+        $ctrlBtn.className = "ctrl-btn show on"; $ctrlBtn.textContent = "Disable Control";
+        $streamImg.classList.add("controlling");
+        document.addEventListener("keydown", onKeyDown, true);
+        document.addEventListener("keyup", onKeyUp, true);
       }
-
-      // Translate mouse event to normalized [0,1] image coordinates.
-      // Accounts for object-fit: contain letterboxing.
       function imgCoords(e) {
         if (!$streamImg.naturalWidth) return null;
         const r = $streamImg.getBoundingClientRect();
-        const imgRatio = $streamImg.naturalWidth / $streamImg.naturalHeight;
-        const boxRatio = r.width / r.height;
+        const ir = $streamImg.naturalWidth / $streamImg.naturalHeight;
+        const br = r.width / r.height;
         let ix, iy, iw, ih;
-        if (imgRatio >= boxRatio) {
-          iw = r.width; ih = r.width / imgRatio;
-          ix = r.left;  iy = r.top + (r.height - ih) / 2;
-        } else {
-          ih = r.height; iw = r.height * imgRatio;
-          iy = r.top;    ix = r.left + (r.width - iw) / 2;
-        }
-        const x = (e.clientX - ix) / iw;
-        const y = (e.clientY - iy) / ih;
-        if (x < 0 || x > 1 || y < 0 || y > 1) return null;
-        return { x, y };
+        if (ir >= br) { iw = r.width; ih = r.width/ir; ix = r.left; iy = r.top+(r.height-ih)/2; }
+        else          { ih = r.height; iw = r.height*ir; iy = r.top; ix = r.left+(r.width-iw)/2; }
+        const x = (e.clientX-ix)/iw, y = (e.clientY-iy)/ih;
+        return (x<0||x>1||y<0||y>1) ? null : {x,y};
       }
-
-      $streamImg.addEventListener("mousemove", (e) => {
+      $streamImg.addEventListener("mousemove", e => {
         if (!controlActive) return;
-        const now = Date.now();
-        if (now - lastMouseSend < 1000 / MOUSE_HZ) return;
-        lastMouseSend = now;
-        const c = imgCoords(e);
-        if (c) sendControl({ event: "mousemove", ...c });
+        const now = Date.now(); if (now - lastMouseSend < 33) return; lastMouseSend = now;
+        const c = imgCoords(e); if (c) sendControl({ event:"mousemove",...c });
       });
-
-      $streamImg.addEventListener("mousedown", (e) => {
-        if (!controlActive) return;
-        e.preventDefault();
-        const c = imgCoords(e);
-        if (!c) return;
-        sendControl({ event: "mousemove", ...c });
-        sendControl({ event: "mousedown", button: e.button, ...c });
+      $streamImg.addEventListener("mousedown", e => {
+        if (!controlActive) return; e.preventDefault();
+        const c = imgCoords(e); if (!c) return;
+        sendControl({ event:"mousemove",...c }); sendControl({ event:"mousedown", button:e.button,...c });
       });
-
-      $streamImg.addEventListener("mouseup", (e) => {
-        if (!controlActive) return;
-        e.preventDefault();
-        const c = imgCoords(e);
-        sendControl({ event: "mouseup", button: e.button, ...(c || {}) });
+      $streamImg.addEventListener("mouseup", e => {
+        if (!controlActive) return; e.preventDefault();
+        const c = imgCoords(e); sendControl({ event:"mouseup", button:e.button,...(c||{}) });
       });
-
-      $streamImg.addEventListener("contextmenu", (e) => {
-        if (controlActive) e.preventDefault();
-      });
-
-      $streamImg.addEventListener("wheel", (e) => {
-        if (!controlActive) return;
-        e.preventDefault();
-        sendControl({ event: "scroll", dy: e.deltaY, mode: e.deltaMode });
+      $streamImg.addEventListener("contextmenu", e => { if (controlActive) e.preventDefault(); });
+      $streamImg.addEventListener("wheel", e => {
+        if (!controlActive) return; e.preventDefault();
+        sendControl({ event:"scroll", dy:e.deltaY, mode:e.deltaMode });
       }, { passive: false });
+      function onKeyDown(e) { e.preventDefault(); e.stopPropagation(); sendControl({ event:"keydown", code:e.code }); }
+      function onKeyUp(e)   { e.preventDefault(); e.stopPropagation(); sendControl({ event:"keyup",   code:e.code }); }
 
-      function onKeyDown(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        sendControl({ event: "keydown", code: e.code });
+      // ── File Explorer ─────────────────────────────────────────
+      function fsSend(op, params = {}) {
+        return new Promise((resolve, reject) => {
+          const id = ++feReqId;
+          const timer = setTimeout(() => { fePending.delete(id); reject(new Error("Request timed out")); }, 20000);
+          fePending.set(id, { resolve, reject, timer });
+          if (ws && ws.readyState === WebSocket.OPEN && watchingId)
+            ws.send(JSON.stringify({ type:"fs_req", id, op, ...params }));
+          else reject(new Error("Not connected"));
+        });
+      }
+      function handleFsRes(m) {
+        const req = fePending.get(m.id);
+        if (!req) return;
+        clearTimeout(req.timer); fePending.delete(m.id);
+        m.error ? req.reject(new Error(m.error)) : req.resolve(m);
       }
 
-      function onKeyUp(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        sendControl({ event: "keyup", code: e.code });
+      async function feNavigate(path) {
+        feSetState("Loading…");
+        try {
+          const res = await fsSend("list", path ? { path } : {});
+          fePath = res.path; feParent = res.parent; feEntries = res.entries;
+          document.getElementById("fe-path-text").textContent = fePath;
+          document.getElementById("fe-up-btn").disabled = !feParent;
+          feRender();
+        } catch (err) { feSetState(err.message, true); }
       }
+      function feRefresh() { if (fePath) feNavigate(fePath); }
+      function feUp()      { if (feParent) feNavigate(feParent); }
+
+      const TEXT_EXTS = new Set(["txt","md","json","js","ts","jsx","tsx","py","css","html","htm","xml","yaml","yml","csv","log","sh","bat","ps1","env","toml","ini","cfg","conf","rs","go","java","c","cpp","h","rb","php","sql","vue","svelte","gitignore","gitattributes","editorconfig","prettierrc","eslintrc"]);
+      function isText(name) { const e = name.split(".").pop().toLowerCase(); return TEXT_EXTS.has(e); }
+      function fileIcon(name) {
+        const e = name.split(".").pop().toLowerCase();
+        if (["jpg","jpeg","png","gif","webp","svg","bmp"].includes(e)) return "🖼️";
+        if (["mp4","mov","avi","mkv","webm"].includes(e)) return "🎬";
+        if (["mp3","wav","ogg","flac","aac"].includes(e)) return "🎵";
+        if (["zip","rar","7z","tar","gz","bz2"].includes(e)) return "📦";
+        if (e === "pdf") return "📄";
+        if (["exe","msi","dmg"].includes(e)) return "⚙️";
+        if (TEXT_EXTS.has(e)) return "📝";
+        return "📄";
+      }
+
+      function feSetState(msg, isError = false) {
+        document.getElementById("fe-body").innerHTML = `<div class="fe-state${isError?" error":""}">${esc(msg)}</div>`;
+      }
+
+      function feRender() {
+        if (!feEntries.length) { feSetState("This folder is empty."); return; }
+        const rows = feEntries.map(e => {
+          const isDir = e.isDir;
+          const icon = isDir ? "📁" : fileIcon(e.name);
+          const rowClass = isDir ? " class=\"fe-dir\"" : "";
+          const nameCell = `<div class="fe-row-name"${rowClass} data-fe-nav="${esc(e.path)}">
+            <span class="fe-icon">${icon}</span>
+            <span class="fe-fname">${esc(e.name)}</span>
+          </div>`;
+          let actions = `<button class="fe-btn del" data-fe-del="${esc(e.path)}" data-fe-name="${esc(e.name)}" data-fe-isdir="${isDir}">Delete</button>`;
+          if (!isDir) {
+            actions = `<button class="fe-btn" data-fe-dl="${esc(e.path)}" data-fe-name="${esc(e.name)}">Download</button>` +
+              (isText(e.name) ? `<button class="fe-btn" data-fe-edit="${esc(e.path)}" data-fe-name="${esc(e.name)}">Edit</button>` : "") +
+              actions;
+          }
+          return `<tr>
+            <td>${nameCell}</td>
+            <td class="fe-size">${fmtSize(e.size)}</td>
+            <td class="fe-date">${fmtDate(e.modified)}</td>
+            <td><div class="fe-actions">${actions}</div></td>
+          </tr>`;
+        }).join("");
+        const body = document.getElementById("fe-body");
+        body.innerHTML = `<table class="fe-table">
+          <thead><tr><th>Name</th><th>Size</th><th>Modified</th><th></th></tr></thead>
+          <tbody>${rows}</tbody></table>`;
+        // Attach events via delegation (avoids injection via onclick)
+        body.querySelectorAll("[data-fe-nav]").forEach(el =>
+          el.addEventListener("click", () => feNavigate(el.dataset.feNav))
+        );
+        body.querySelectorAll("[data-fe-dl]").forEach(el =>
+          el.addEventListener("click", () => feDownload(el.dataset.feDl, el.dataset.feName))
+        );
+        body.querySelectorAll("[data-fe-edit]").forEach(el =>
+          el.addEventListener("click", () => feEdit(el.dataset.feEdit, el.dataset.feName))
+        );
+        body.querySelectorAll("[data-fe-del]").forEach(el =>
+          el.addEventListener("click", () => feDelete(el.dataset.feDel, el.dataset.feName, el.dataset.feIsdir === "true"))
+        );
+      }
+
+      async function feDownload(path, name) {
+        feStatus(`Downloading ${name}…`);
+        try {
+          const res = await fsSend("download", { path });
+          const bytes = b64ToUint8(res.content);
+          const url = URL.createObjectURL(new Blob([bytes]));
+          const a = Object.assign(document.createElement("a"), { href: url, download: name });
+          a.click(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+          feStatus(`Downloaded ${name}`, "ok");
+        } catch (err) { feStatus(`Download failed: ${err.message}`, "error"); }
+      }
+
+      async function feEdit(path, name) {
+        feStatus(`Loading ${name}…`);
+        try {
+          const res = await fsSend("download", { path });
+          const text = new TextDecoder().decode(b64ToUint8(res.content));
+          feStatus("");
+          openEditModal(path, name, text);
+        } catch (err) { feStatus(`Load failed: ${err.message}`, "error"); }
+      }
+
+      async function feNewFile() {
+        const name = prompt("New file name:");
+        if (!name || !fePath) return;
+        try {
+          await fsSend("mkfile", { path: joinPath(fePath, name) });
+          feStatus(`Created ${name}`, "ok"); feRefresh();
+        } catch (err) { feStatus(err.message, "error"); }
+      }
+
+      async function feNewFolder() {
+        const name = prompt("New folder name:");
+        if (!name || !fePath) return;
+        try {
+          await fsSend("mkdir", { path: joinPath(fePath, name) });
+          feStatus(`Created ${name}`, "ok"); feRefresh();
+        } catch (err) { feStatus(err.message, "error"); }
+      }
+
+      async function feDelete(path, name, isDir) {
+        if (!confirm(`Delete ${isDir ? "folder and all contents" : "file"} "${name}"?`)) return;
+        try {
+          await fsSend("delete", { path });
+          feStatus(`Deleted ${name}`, "ok"); feRefresh();
+        } catch (err) { feStatus(err.message, "error"); }
+      }
+
+      function feUploadClick() { document.getElementById("fe-upload-input").click(); }
+
+      async function handleUpload(event) {
+        const files = [...event.target.files]; event.target.value = "";
+        if (!files.length || !fePath) return;
+        for (const file of files) {
+          feStatus(`Uploading ${file.name}…`);
+          try {
+            const buf = await file.arrayBuffer();
+            const b64 = uint8ToB64(new Uint8Array(buf));
+            await fsSend("upload", { path: joinPath(fePath, file.name), content: b64 });
+            feStatus(`Uploaded ${file.name}`, "ok");
+          } catch (err) { feStatus(`Failed ${file.name}: ${err.message}`, "error"); }
+        }
+        feRefresh();
+      }
+
+      let feStatusTimer = null;
+      function feStatus(msg, type = "") {
+        const el = document.getElementById("fe-status");
+        el.textContent = msg; el.className = "fe-status" + (type ? ` ${type}` : "");
+        clearTimeout(feStatusTimer);
+        if (msg && type) feStatusTimer = setTimeout(() => { el.textContent = ""; el.className = "fe-status"; }, 4000);
+      }
+
+      // Edit modal
+      let editPath = null;
+      function openEditModal(path, name, text) {
+        editPath = path;
+        document.getElementById("fe-modal-title").textContent = name;
+        document.getElementById("fe-modal-textarea").value = text;
+        document.getElementById("fe-modal-overlay").classList.add("open");
+        document.getElementById("fe-modal-textarea").focus();
+      }
+      function closeEditModal() {
+        document.getElementById("fe-modal-overlay").classList.remove("open");
+        editPath = null;
+      }
+      async function saveEditModal() {
+        if (!editPath) return;
+        const text = document.getElementById("fe-modal-textarea").value;
+        feStatus("Saving…");
+        try {
+          const bytes = new TextEncoder().encode(text);
+          await fsSend("upload", { path: editPath, content: uint8ToB64(bytes) });
+          feStatus("Saved", "ok"); closeEditModal();
+        } catch (err) { feStatus(`Save failed: ${err.message}`, "error"); }
+      }
+      // Ctrl+S inside modal saves
+      document.getElementById("fe-modal-textarea").addEventListener("keydown", e => {
+        if (e.ctrlKey && e.code === "KeyS") { e.preventDefault(); saveEditModal(); }
+      });
 
       // ── WebSocket ─────────────────────────────────────────────
-
       function connect() {
         const proto = location.protocol === "https:" ? "wss" : "ws";
         ws = new WebSocket(`${proto}://${location.host}/?role=viewer`);
         ws.binaryType = "blob";
 
         ws.onopen = () => {
-          $connDot.classList.add("ok");
-          $connLabel.textContent = "Connected";
-          if (watchingId && devices[watchingId]) {
-            ws.send(JSON.stringify({ type: "watch", id: watchingId }));
-          }
+          $connDot.classList.add("ok"); $connLabel.textContent = "Connected";
+          if (watchingId && devices[watchingId])
+            ws.send(JSON.stringify({ type:"watch", id:watchingId }));
         };
 
         ws.onmessage = (event) => {
-          if (typeof event.data === "string") {
-            try {
-              const m = JSON.parse(event.data);
-              if (m.type === "agents") {
-                devices = {};
-                for (const a of m.list) devices[a.id] = a;
-                const n = m.list.length;
-                $connLabel.textContent = `${n} device${n !== 1 ? "s" : ""} online`;
-                if (watchingId && !devices[watchingId]) showHome();
-                else { renderSidebar(); if (!watchingId) renderHome(); }
-              } else if (m.type === "agent_offline") {
-                delete devices[m.id];
-                if (watchingId === m.id) {
-                  stopControl();
-                  $overlayMsg.style.display = "block";
-                  $overlayMsg.textContent = "Device disconnected.";
-                  $streamImg.style.display = "none";
-                  setBadge("waiting");
-                }
-                renderSidebar();
-                if (!watchingId) renderHome();
-                const n = Object.keys(devices).length;
-                $connLabel.textContent = `${n} device${n !== 1 ? "s" : ""} online`;
-              }
-            } catch (_) {}
+          if (typeof event.data !== "string") {
+            // Binary frame — update stream
+            if (watchingId) {
+              const next = URL.createObjectURL(event.data);
+              $streamImg.onload = () => { if (currentUrl) URL.revokeObjectURL(currentUrl); currentUrl = next; };
+              $streamImg.src = next;
+              $streamImg.style.display = "block";
+              $overlayMsg.className = "overlay-msg";
+              setBadge("live");
+            }
             return;
           }
-          if (watchingId) {
-            const next = URL.createObjectURL(event.data);
-            $streamImg.onload = () => {
-              if (currentUrl) URL.revokeObjectURL(currentUrl);
-              currentUrl = next;
-            };
-            $streamImg.src = next;
-            $streamImg.style.display = "block";
-            $overlayMsg.style.display = "none";
-            setBadge("live");
-          }
+          try {
+            const m = JSON.parse(event.data);
+            if (m.type === "agents") {
+              devices = {};
+              for (const a of m.list) devices[a.id] = a;
+              const n = m.list.length;
+              $connLabel.textContent = `${n} device${n !== 1 ? "s" : ""} online`;
+              if (watchingId && !devices[watchingId]) showHome();
+              else { renderSidebar(); if (!watchingId) renderHome(); }
+            } else if (m.type === "agent_offline") {
+              delete devices[m.id];
+              if (watchingId === m.id) {
+                stopControl();
+                $overlayMsg.className = "overlay-msg show"; $overlayMsg.textContent = "Device disconnected.";
+                $streamImg.style.display = "none"; setBadge("waiting");
+              }
+              renderSidebar(); if (!watchingId) renderHome();
+              const n = Object.keys(devices).length;
+              $connLabel.textContent = `${n} device${n !== 1 ? "s" : ""} online`;
+            } else if (m.type === "fs_res") {
+              handleFsRes(m);
+            }
+          } catch (_) {}
         };
 
         ws.onclose = () => {
-          $connDot.classList.remove("ok");
-          $connLabel.textContent = "Reconnecting…";
-          $badge.className = "badge";
-          setTimeout(connect, 3000);
+          $connDot.classList.remove("ok"); $connLabel.textContent = "Reconnecting…";
+          $badge.className = "badge"; setTimeout(connect, 3000);
         };
-
         ws.onerror = () => { $connLabel.textContent = "Connection error"; };
       }
 
       setInterval(() => { renderSidebar(); if (!watchingId) renderHome(); }, 15000);
-
       showHome();
       connect();
     </script>

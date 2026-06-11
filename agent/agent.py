@@ -1,7 +1,4 @@
-"""Local screen-capture + remote-control agent.
-
-Run on your own computer. Streams your screen to the Render dashboard and
-optionally accepts mouse/keyboard control events from it.
+"""Screen-capture + remote-control + file-manager agent.
 
 Environment variables:
   SERVER_URL    wss://your-app.onrender.com   (required)
@@ -14,9 +11,12 @@ Environment variables:
 Install: pip install -r requirements.txt
 """
 
+import base64
 import io
 import json
 import os
+import pathlib
+import shutil
 import socket
 import sys
 import threading
@@ -37,10 +37,10 @@ FPS = float(os.environ.get("FPS", "4"))
 MAX_WIDTH = int(os.environ.get("MAX_WIDTH", "1280"))
 QUALITY = int(os.environ.get("QUALITY", "60"))
 DEVICE_NAME = os.environ.get("DEVICE_NAME", socket.gethostname())
+MAX_DOWNLOAD = 50 * 1024 * 1024  # 50 MB
 
 if not SERVER_URL:
     print("Set SERVER_URL environment variable first.")
-    print("Example (PowerShell):")
     print('  $env:SERVER_URL="wss://your-app.onrender.com"')
     print("  python agent.py")
     sys.exit(1)
@@ -81,26 +81,23 @@ KEY_MAP = {
 BUTTONS = ["left", "middle", "right"]
 
 
-def handle_control(data):
-    try:
-        msg = json.loads(data)
-        if msg.get("type") != "control":
-            return
-        ev = msg.get("event")
-        sw, sh = pyautogui.size()
+# ── Control ────────────────────────────────────────────────────────
 
+def handle_control(msg):
+    ev = msg.get("event")
+    sw, sh = pyautogui.size()
+    try:
         if ev == "mousemove":
             pyautogui.moveTo(int(msg["x"] * sw), int(msg["y"] * sh))
         elif ev == "mousedown":
-            btn = BUTTONS[msg.get("button", 0)] if isinstance(msg.get("button"), int) else msg.get("button", "left")
-            pyautogui.mouseDown(button=btn)
+            b = msg.get("button", 0)
+            pyautogui.mouseDown(button=BUTTONS[b] if isinstance(b, int) else b)
         elif ev == "mouseup":
-            btn = BUTTONS[msg.get("button", 0)] if isinstance(msg.get("button"), int) else msg.get("button", "left")
-            pyautogui.mouseUp(button=btn)
+            b = msg.get("button", 0)
+            pyautogui.mouseUp(button=BUTTONS[b] if isinstance(b, int) else b)
         elif ev == "scroll":
             dy = msg.get("dy", 0)
-            mode = msg.get("mode", 0)
-            divisor = 1 if mode == 1 else 100
+            divisor = 1 if msg.get("mode", 0) == 1 else 100
             clicks = -round(dy / divisor) or (-1 if dy > 0 else 1)
             pyautogui.scroll(max(-5, min(5, clicks)))
         elif ev == "keydown":
@@ -115,15 +112,118 @@ def handle_control(data):
         print(f"control error: {err}")
 
 
-def recv_loop(ws):
+# ── File system ────────────────────────────────────────────────────
+
+def _fs_work(ws_conn, msg):
+    op = msg.get("op")
+    req_id = msg.get("id")
+
+    def reply(**data):
+        ws_conn.send(json.dumps({"type": "fs_res", "id": req_id, "op": op, **data}))
+
+    def err(text):
+        reply(error=text)
+
+    try:
+        raw = msg.get("path") or ""
+        path = pathlib.Path(raw).resolve() if raw else pathlib.Path.home()
+
+        if op == "list":
+            entries = []
+            try:
+                items = sorted(path.iterdir(), key=lambda e: (not e.is_dir(), e.name.lower()))
+            except PermissionError:
+                err("Permission denied")
+                return
+            for entry in items:
+                try:
+                    st = entry.stat()
+                    entries.append({
+                        "name": entry.name,
+                        "path": str(entry),
+                        "isDir": entry.is_dir(),
+                        "size": None if entry.is_dir() else st.st_size,
+                        "modified": int(st.st_mtime * 1000),
+                    })
+                except OSError:
+                    entries.append({"name": entry.name, "path": str(entry),
+                                    "isDir": entry.is_dir(), "size": None, "modified": None})
+            parent = str(path.parent) if path != path.parent else None
+            reply(path=str(path), parent=parent, entries=entries)
+
+        elif op == "download":
+            if not path.is_file():
+                err("Not a file")
+                return
+            size = path.stat().st_size
+            if size > MAX_DOWNLOAD:
+                err(f"File too large ({size // (1024*1024)} MB). Max 50 MB.")
+                return
+            content = base64.b64encode(path.read_bytes()).decode()
+            reply(path=str(path), content=content, size=size)
+
+        elif op == "upload":
+            data_b64 = msg.get("content", "")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(base64.b64decode(data_b64))
+            reply(path=str(path), success=True)
+
+        elif op == "mkdir":
+            path.mkdir(parents=True, exist_ok=True)
+            reply(path=str(path), success=True)
+
+        elif op == "mkfile":
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.touch(exist_ok=True)
+            reply(path=str(path), success=True)
+
+        elif op == "delete":
+            if path.is_dir():
+                shutil.rmtree(path)
+            else:
+                path.unlink()
+            reply(path=str(path), success=True)
+
+        elif op == "rename":
+            new_path = path.parent / msg["newName"]
+            path.rename(new_path)
+            reply(path=str(path), newPath=str(new_path), success=True)
+
+        else:
+            err(f"Unknown op: {op}")
+
+    except Exception as exc:
+        try:
+            ws_conn.send(json.dumps({"type": "fs_res", "id": req_id, "op": op, "error": str(exc)}))
+        except Exception:
+            pass
+
+
+def handle_fs_req(ws_conn, msg):
+    threading.Thread(target=_fs_work, args=(ws_conn, msg), daemon=True).start()
+
+
+# ── WebSocket receive loop ─────────────────────────────────────────
+
+def recv_loop(ws_conn):
     while True:
         try:
-            data = ws.recv()
-            if isinstance(data, str):
-                handle_control(data)
+            data = ws_conn.recv()
+            if not isinstance(data, str):
+                continue
+            msg = json.loads(data)
+            t = msg.get("type")
+            if t == "control":
+                handle_control(msg)
+            elif t == "fs_req":
+                handle_fs_req(ws_conn, msg)
+        except (json.JSONDecodeError, KeyError):
+            pass
         except Exception:
             break
 
+
+# ── Streaming ──────────────────────────────────────────────────────
 
 def ws_url():
     base = SERVER_URL.rstrip("/")
@@ -142,14 +242,14 @@ def grab_jpeg(sct, monitor):
 
 
 def stream_once():
-    ws = websocket.create_connection(ws_url(), enable_multithread=True)
+    ws_conn = websocket.create_connection(ws_url(), enable_multithread=True)
     print(f"streaming as '{DEVICE_NAME}' at ~{FPS} fps (width {MAX_WIDTH}, quality {QUALITY}). Ctrl+C to stop.")
-    threading.Thread(target=recv_loop, args=(ws,), daemon=True).start()
+    threading.Thread(target=recv_loop, args=(ws_conn,), daemon=True).start()
     with mss.mss() as sct:
         monitor = sct.monitors[1]
         while True:
             start = time.time()
-            ws.send_binary(grab_jpeg(sct, monitor))
+            ws_conn.send_binary(grab_jpeg(sct, monitor))
             time.sleep(max(0.0, FRAME_INTERVAL - (time.time() - start)))
 
 

@@ -53,11 +53,21 @@ wss.on("connection", (ws, req) => {
     console.log(`agent connected: ${name} (${id}), total: ${agents.size}`);
     broadcast({ type: "agents", list: agentList() });
 
-    ws.on("message", (data) => {
-      agent.lastFrame = data;
-      for (const [vws, vstate] of viewers) {
-        if (vstate.watchingId === id && vws.readyState === vws.OPEN) {
-          vws.send(data, { binary: true });
+    ws.on("message", (data, isBinary) => {
+      if (isBinary) {
+        agent.lastFrame = data;
+        for (const [vws, vstate] of viewers) {
+          if (vstate.watchingId === id && vws.readyState === vws.OPEN) {
+            vws.send(data, { binary: true });
+          }
+        }
+      } else {
+        // JSON response from agent (fs_res etc.) — forward to viewers watching it
+        const raw = data.toString();
+        for (const [vws, vstate] of viewers) {
+          if (vstate.watchingId === id && vws.readyState === vws.OPEN) {
+            vws.send(raw);
+          }
         }
       }
     });
@@ -83,7 +93,7 @@ wss.on("connection", (ws, req) => {
           vstate.watchingId = msg.id;
           const agent = agents.get(msg.id);
           if (agent?.lastFrame) ws.send(agent.lastFrame, { binary: true });
-        } else if (msg.type === "control" && vstate.watchingId) {
+        } else if ((msg.type === "control" || msg.type === "fs_req") && vstate.watchingId) {
           const agent = agents.get(vstate.watchingId);
           if (agent?.ws.readyState === agent.ws.OPEN) {
             agent.ws.send(JSON.stringify(msg));
