@@ -33,6 +33,15 @@ from PIL import Image
 pyautogui.FAILSAFE = False
 pyautogui.PAUSE = 0
 
+# Windows-only: icon extraction via pywin32
+_WIN32_OK = False
+if platform.system() == "Windows":
+    try:
+        import win32gui, win32ui, win32con
+        _WIN32_OK = True
+    except ImportError:
+        pass
+
 SERVER_URL  = os.environ.get("SERVER_URL",  "wss://pgratzd.onrender.com")
 TOKEN       = os.environ.get("STREAM_TOKEN", "changeme")
 FPS         = float(os.environ.get("FPS",       "4"))
@@ -273,6 +282,101 @@ def handle_exec_req(ws_conn, msg):
     threading.Thread(target=_exec_work, args=(ws_conn, msg), daemon=True).start()
 
 
+# ── Apps (Windows) ─────────────────────────────────────────────────
+
+def _hicon_to_b64(hicon, size=48):
+    try:
+        hdc_screen = win32gui.GetDC(0)
+        hdc = win32ui.CreateDCFromHandle(hdc_screen)
+        hdc_mem = hdc.CreateCompatibleDC()
+        hbmp = win32ui.CreateBitmap()
+        hbmp.CreateCompatibleBitmap(hdc, size, size)
+        hdc_mem.SelectObject(hbmp)
+        hdc_mem.FillSolidRect((0, 0, size, size), 0x1a1e25)
+        win32gui.DrawIconEx(hdc_mem.GetSafeHdc(), 0, 0, hicon, size, size, 0, None, win32con.DI_NORMAL)
+        bmpstr = hbmp.GetBitmapBits(True)
+        img = Image.frombuffer("RGB", (size, size), bmpstr, "raw", "BGRX", 0, 1)
+        hdc_mem.DeleteDC()
+        win32gui.ReleaseDC(0, hdc_screen)
+        win32gui.DeleteObject(hbmp.GetHandle())
+        buf = io.BytesIO()
+        img.save(buf, "PNG", optimize=True)
+        return base64.b64encode(buf.getvalue()).decode()
+    except Exception:
+        return None
+
+
+def _extract_icon_b64(path, size=48):
+    if not _WIN32_OK:
+        return None
+    try:
+        large, small = win32gui.ExtractIconEx(str(path), 0)
+        icons = list(large) + list(small)
+        if not icons:
+            return None
+        result = _hicon_to_b64(icons[0], size)
+        for h in icons:
+            try:
+                win32gui.DestroyIcon(h)
+            except Exception:
+                pass
+        return result
+    except Exception:
+        return None
+
+
+def _apps_work(ws_conn, msg):
+    op = msg.get("op")
+    req_id = msg.get("id")
+
+    def reply(**data):
+        try:
+            ws_conn.send(json.dumps({"type": "apps_res", "id": req_id, "op": op, **data}))
+        except Exception:
+            pass
+
+    if op == "list":
+        roots = []
+        for base_env in ["PROGRAMDATA", "APPDATA"]:
+            base = os.environ.get(base_env, "")
+            if base:
+                p = pathlib.Path(base) / "Microsoft" / "Windows" / "Start Menu" / "Programs"
+                if p.exists():
+                    roots.append(p)
+
+        seen: set = set()
+        apps = []
+        for root in roots:
+            for lnk in sorted(root.rglob("*.lnk"), key=lambda x: x.stem.lower()):
+                key = lnk.stem.lower()
+                if key in seen:
+                    continue
+                seen.add(key)
+                rel = lnk.relative_to(root)
+                category = str(rel.parent) if str(rel.parent) != "." else ""
+                icon = _extract_icon_b64(str(lnk))
+                apps.append({
+                    "name": lnk.stem,
+                    "path": str(lnk),
+                    "category": category,
+                    "icon": icon,
+                })
+
+        reply(apps=sorted(apps, key=lambda a: a["name"].lower()))
+
+    elif op == "launch":
+        path = msg.get("path", "")
+        try:
+            os.startfile(path)
+            reply(success=True)
+        except Exception as exc:
+            reply(error=str(exc))
+
+
+def handle_apps_req(ws_conn, msg):
+    threading.Thread(target=_apps_work, args=(ws_conn, msg), daemon=True).start()
+
+
 # ── WebSocket receive loop ─────────────────────────────────────────
 
 def recv_loop(ws_conn):
@@ -289,6 +393,8 @@ def recv_loop(ws_conn):
                 handle_fs_req(ws_conn, msg)
             elif t == "exec_req":
                 handle_exec_req(ws_conn, msg)
+            elif t == "apps_req":
+                handle_apps_req(ws_conn, msg)
         except (json.JSONDecodeError, KeyError):
             pass
         except Exception:

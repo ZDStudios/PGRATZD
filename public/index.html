@@ -168,6 +168,26 @@
       .term-clear-btn { font-size: 12px; padding: 5px 10px; border-radius: 5px; border: 1px solid #2a2f37; background: transparent; color: #6b7280; cursor: pointer; }
       .term-clear-btn:hover { border-color: #4b5563; color: #e6e8eb; }
 
+      /* ── Apps ── */
+      #apps-tab.active { display: flex; flex-direction: column; background: #0d0f12; }
+      .apps-toolbar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #13161b; border-bottom: 1px solid #1e2229; flex-shrink: 0; }
+      .apps-search { flex: 1; background: #0d0f12; border: 1px solid #1e2229; color: #e6e8eb; padding: 6px 12px; border-radius: 6px; font-size: 13px; outline: none; transition: border-color .15s; }
+      .apps-search:focus { border-color: #2f6fed; }
+      .apps-count { font-size: 11px; color: #4b5563; white-space: nowrap; }
+      .apps-body { flex: 1; overflow-y: auto; padding: 14px 16px; }
+      .apps-state { padding: 40px 20px; text-align: center; font-size: 13px; color: #6b7280; }
+      .apps-state.error { color: #f87171; }
+      .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 4px; }
+      .app-card { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 12px 6px 10px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; user-select: none; transition: background .12s, border-color .12s; }
+      .app-card:hover { background: #13161b; border-color: #1e2229; }
+      .app-card:active { background: #1a1e25; }
+      .app-icon { width: 40px; height: 40px; border-radius: 4px; image-rendering: -webkit-optimize-contrast; }
+      .app-icon-ph { width: 40px; height: 40px; border-radius: 6px; background: #1e2229; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+      .app-name { font-size: 11px; text-align: center; color: #c9d1da; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: 82px; word-break: break-word; }
+      .apps-toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(12px); background: #1a1e25; border: 1px solid #2a2f37; color: #e6e8eb; padding: 8px 20px; border-radius: 8px; font-size: 13px; opacity: 0; pointer-events: none; z-index: 300; white-space: nowrap; transition: opacity .2s, transform .2s; }
+      .apps-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .apps-toast.err { border-color: #7f1d1d; color: #f87171; }
+
       /* ── Edit Modal ── */
       .fe-modal-overlay { position: fixed; inset: 0; background: #000000bb; display: none; align-items: center; justify-content: center; z-index: 200; }
       .fe-modal-overlay.open { display: flex; }
@@ -224,6 +244,7 @@
           <button class="tab-btn active" data-tab="screen"   onclick="switchTab('screen')">Screen</button>
           <button class="tab-btn"        data-tab="files"    onclick="switchTab('files')">Files</button>
           <button class="tab-btn"        data-tab="terminal" onclick="switchTab('terminal')">Terminal</button>
+          <button class="tab-btn"        data-tab="apps"     onclick="switchTab('apps')">Apps</button>
         </div>
         <button class="ctrl-btn" id="ctrl-btn" onclick="toggleControl()">Enable Control</button>
         <span class="badge" id="badge"></span>
@@ -277,8 +298,22 @@
             <button class="term-clear-btn" onclick="termClear()">Clear</button>
           </div>
         </div>
+
+        <!-- Apps tab -->
+        <div class="view-tab" id="apps-tab">
+          <div class="apps-toolbar">
+            <input class="apps-search" id="apps-search" type="text" placeholder="Search apps…" autocomplete="off" spellcheck="false" oninput="appsFilter=this.value.toLowerCase();appsRender()" />
+            <button class="fe-nav-btn" onclick="appsLoad()">↺ Refresh</button>
+            <span class="apps-count" id="apps-count"></span>
+          </div>
+          <div class="apps-body" id="apps-body">
+            <div class="apps-state">Select a device then open Apps to scan installed applications.</div>
+          </div>
+        </div>
       </div>
     </main>
+
+    <div class="apps-toast" id="apps-toast"></div>
 
     <!-- Edit Modal -->
     <div class="fe-modal-overlay" id="fe-modal-overlay">
@@ -315,6 +350,7 @@
       const $screenTab   = document.getElementById("screen-tab");
       const $filesTab    = document.getElementById("files-tab");
       const $terminalTab = document.getElementById("terminal-tab");
+      const $appsTab     = document.getElementById("apps-tab");
       const $termOutput  = document.getElementById("term-output");
       const $termInput   = document.getElementById("term-input");
       const $termRunBtn  = document.getElementById("term-run-btn");
@@ -327,6 +363,8 @@
       let feHistory = [], feHistIdx = -1;
       let feReqId = 0; const fePending = new Map();
       let termHistory = [], termHistIdx = -1, termRunning = false;
+      let appsData = [], appsLoaded = false, appsFilter = "";
+      let appsReqId = 0; const appsPending = new Map();
       let termReqId = 0; const termPending = new Map();
 
       // ── Login ─────────────────────────────────────────────────
@@ -387,14 +425,14 @@
       // ── Navigation ────────────────────────────────────────────
       function showHome() {
         stopControl(); watchingId=null; fePath=null; activeTab="screen";
-        $home.style.display="block"; $screenTab.classList.remove("active"); $filesTab.classList.remove("active"); $terminalTab.classList.remove("active");
+        $home.style.display="block"; $screenTab.classList.remove("active"); $filesTab.classList.remove("active"); $terminalTab.classList.remove("active"); $appsTab.classList.remove("active");
         $tabGroup.classList.remove("show"); $topbarTitle.textContent="PGRATZD"; $badge.className="badge";
         $backBtn.classList.remove("show"); $ctrlBtn.classList.remove("show");
         renderSidebar(); renderHome();
       }
       function watchDevice(id) {
         if(!devices[id])return;
-        stopControl(); termClear(); watchingId=id; fePath=null; feHistory=[]; feHistIdx=-1; activeTab="screen";
+        stopControl(); termClear(); watchingId=id; fePath=null; feHistory=[]; feHistIdx=-1; appsLoaded=false; appsData=[]; appsFilter=""; activeTab="screen";
         $home.style.display="none"; $screenTab.classList.add("active"); $filesTab.classList.remove("active"); $terminalTab.classList.remove("active");
         $tabGroup.classList.add("show");
         document.querySelectorAll(".tab-btn").forEach(el=>el.classList.toggle("active",el.dataset.tab==="screen"));
@@ -407,9 +445,10 @@
       function switchTab(tab) {
         activeTab=tab;
         document.querySelectorAll(".tab-btn").forEach(el=>el.classList.toggle("active",el.dataset.tab===tab));
-        $screenTab.classList.toggle("active",tab==="screen"); $filesTab.classList.toggle("active",tab==="files"); $terminalTab.classList.toggle("active",tab==="terminal");
+        $screenTab.classList.toggle("active",tab==="screen"); $filesTab.classList.toggle("active",tab==="files"); $terminalTab.classList.toggle("active",tab==="terminal"); $appsTab.classList.toggle("active",tab==="apps");
         if(tab==="files"&&watchingId&&!fePath) feNavigate(null);
         if(tab==="terminal") setTimeout(()=>$termInput.focus(),50);
+        if(tab==="apps"&&watchingId&&!appsLoaded) appsLoad();
       }
 
       // ── Remote Control ────────────────────────────────────────
@@ -561,6 +600,7 @@
               const n=Object.keys(devices).length; $connLabel.textContent=`${n} device${n!==1?"s":""} online`;
             } else if (m.type === "fs_res")   { handleFsRes(m); }
               else if (m.type === "exec_res") { handleExecRes(m); }
+              else if (m.type === "apps_res") { handleAppsRes(m); }
           } catch(_) {}
         };
 
@@ -578,6 +618,66 @@
         };
 
         ws.onerror = () => { $connLabel.textContent = "Connection error"; };
+      }
+
+      // ── Apps ──────────────────────────────────────────────────────
+      function appsSend(op, params={}) {
+        return new Promise((resolve, reject) => {
+          const id = ++appsReqId;
+          const timer = setTimeout(() => { appsPending.delete(id); reject(new Error("Timed out")); }, 90000);
+          appsPending.set(id, { resolve, reject, timer });
+          if (ws && ws.readyState === WebSocket.OPEN && watchingId)
+            ws.send(JSON.stringify({ type: "apps_req", id, op, ...params }));
+          else { clearTimeout(timer); appsPending.delete(id); reject(new Error("Not connected")); }
+        });
+      }
+      function handleAppsRes(m) {
+        const r = appsPending.get(m.id); if (!r) return;
+        clearTimeout(r.timer); appsPending.delete(m.id);
+        m.error ? r.reject(new Error(m.error)) : r.resolve(m);
+      }
+      async function appsLoad() {
+        appsLoaded = false; appsData = [];
+        document.getElementById("apps-search").value = ""; appsFilter = "";
+        document.getElementById("apps-count").textContent = "";
+        document.getElementById("apps-body").innerHTML = '<div class="apps-state">Scanning installed apps… this may take a few seconds.</div>';
+        try {
+          const r = await appsSend("list");
+          appsData = r.apps || [];
+          appsLoaded = true;
+          appsRender();
+        } catch(err) {
+          document.getElementById("apps-body").innerHTML = `<div class="apps-state error">Scan failed: ${esc(err.message)}</div>`;
+        }
+      }
+      function appsRender() {
+        const body = document.getElementById("apps-body");
+        const q = appsFilter;
+        const list = q ? appsData.filter(a => a.name.toLowerCase().includes(q)) : appsData;
+        document.getElementById("apps-count").textContent = `${list.length} app${list.length !== 1 ? "s" : ""}`;
+        if (!list.length) { body.innerHTML = '<div class="apps-state">No apps found.</div>'; return; }
+        const cards = list.map(a =>
+          `<div class="app-card" data-path="${esc(a.path)}" title="${esc(a.name)}">` +
+          (a.icon ? `<img class="app-icon" src="data:image/png;base64,${a.icon}" alt="" />` : `<div class="app-icon-ph">📱</div>`) +
+          `<div class="app-name">${esc(a.name)}</div></div>`
+        ).join("");
+        body.innerHTML = `<div class="apps-grid">${cards}</div>`;
+        body.querySelectorAll(".app-card").forEach(el =>
+          el.addEventListener("click", () => appsLaunch(el.dataset.path, el.title))
+        );
+      }
+      async function appsLaunch(path, name) {
+        try {
+          await appsSend("launch", { path });
+          appsToast(`Launching ${name}…`);
+        } catch(err) { appsToast(`Failed: ${err.message}`, true); }
+      }
+      let _appsToastTimer = null;
+      function appsToast(msg, isErr = false) {
+        const el = document.getElementById("apps-toast");
+        el.textContent = msg; el.className = "apps-toast" + (isErr ? " err" : "") + " show";
+        clearTimeout(_appsToastTimer);
+        _appsToastTimer = setTimeout(() => el.classList.remove("show"), 2500);
       }
 
       setInterval(()=>{renderSidebar();if(!watchingId)renderHome();},15000);
