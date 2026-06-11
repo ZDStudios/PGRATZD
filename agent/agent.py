@@ -33,14 +33,7 @@ from PIL import Image
 pyautogui.FAILSAFE = False
 pyautogui.PAUSE = 0
 
-# Windows-only: icon extraction via pywin32
-_WIN32_OK = False
-if platform.system() == "Windows":
-    try:
-        import win32gui, win32ui, win32con
-        _WIN32_OK = True
-    except ImportError:
-        pass
+import ctypes
 
 SERVER_URL  = os.environ.get("SERVER_URL",  "wss://pgratzd.onrender.com")
 TOKEN       = os.environ.get("STREAM_TOKEN", "changeme")
@@ -284,43 +277,93 @@ def handle_exec_req(ws_conn, msg):
 
 # ── Apps (Windows) ─────────────────────────────────────────────────
 
-def _hicon_to_b64(hicon, size=48):
+def _extract_icon_b64(path, size=48):
+    """Extract icon via pure ctypes (no pywin32 needed — works in PyInstaller bundles)."""
+    if platform.system() != "Windows":
+        return None
     try:
-        hdc_screen = win32gui.GetDC(0)
-        hdc = win32ui.CreateDCFromHandle(hdc_screen)
-        hdc_mem = hdc.CreateCompatibleDC()
-        hbmp = win32ui.CreateBitmap()
-        hbmp.CreateCompatibleBitmap(hdc, size, size)
-        hdc_mem.SelectObject(hbmp)
-        hdc_mem.FillSolidRect((0, 0, size, size), 0x1a1e25)
-        win32gui.DrawIconEx(hdc_mem.GetSafeHdc(), 0, 0, hicon, size, size, 0, None, win32con.DI_NORMAL)
-        bmpstr = hbmp.GetBitmapBits(True)
-        img = Image.frombuffer("RGB", (size, size), bmpstr, "raw", "BGRX", 0, 1)
-        hdc_mem.DeleteDC()
-        win32gui.ReleaseDC(0, hdc_screen)
-        win32gui.DeleteObject(hbmp.GetHandle())
+        shell32 = ctypes.windll.shell32
+        user32  = ctypes.windll.user32
+        gdi32   = ctypes.windll.gdi32
+
+        # Set 64-bit-safe return types for handle-returning functions
+        for fn in (user32.GetDC, gdi32.CreateCompatibleDC, gdi32.CreateCompatibleBitmap,
+                   gdi32.SelectObject, gdi32.CreateSolidBrush):
+            fn.restype = ctypes.c_size_t
+        shell32.SHGetFileInfoW.restype = ctypes.c_size_t
+
+        class SHFILEINFOW(ctypes.Structure):
+            _fields_ = [
+                ("hIcon",         ctypes.c_size_t),
+                ("iIcon",         ctypes.c_int),
+                ("dwAttributes",  ctypes.c_uint32),
+                ("szDisplayName", ctypes.c_wchar * 260),
+                ("szTypeName",    ctypes.c_wchar * 80),
+            ]
+
+        shfi = SHFILEINFOW()
+        ret = shell32.SHGetFileInfoW(
+            str(path), 0, ctypes.byref(shfi), ctypes.sizeof(shfi),
+            0x100 | 0x0,  # SHGFI_ICON | SHGFI_LARGEICON
+        )
+        if not ret or not shfi.hIcon:
+            return None
+
+        hicon = shfi.hIcon
+
+        # Create memory DC + bitmap to render the icon into
+        hdc_screen = user32.GetDC(None)
+        hdc_mem    = gdi32.CreateCompatibleDC(hdc_screen)
+        hbmp       = gdi32.CreateCompatibleBitmap(hdc_screen, size, size)
+        gdi32.SelectObject(hdc_mem, hbmp)
+
+        # Fill background (#1a1e25 → COLORREF = 0x00251e1a)
+        class RECT(ctypes.Structure):
+            _fields_ = [("left",ctypes.c_long),("top",ctypes.c_long),
+                        ("right",ctypes.c_long),("bottom",ctypes.c_long)]
+        hbr = gdi32.CreateSolidBrush(0x00251e1a)
+        rc  = RECT(0, 0, size, size)
+        user32.FillRect(hdc_mem, ctypes.byref(rc), hbr)
+        gdi32.DeleteObject(hbr)
+
+        # Draw icon: DI_NORMAL = 0x3
+        user32.DrawIconEx(hdc_mem, 0, 0, hicon, size, size, 0, None, 0x3)
+        user32.DestroyIcon(hicon)
+
+        # Read pixels back as a 32-bit top-down DIB
+        class BITMAPINFOHEADER(ctypes.Structure):
+            _fields_ = [
+                ("biSize",          ctypes.c_uint32),
+                ("biWidth",         ctypes.c_int32),
+                ("biHeight",        ctypes.c_int32),
+                ("biPlanes",        ctypes.c_uint16),
+                ("biBitCount",      ctypes.c_uint16),
+                ("biCompression",   ctypes.c_uint32),
+                ("biSizeImage",     ctypes.c_uint32),
+                ("biXPelsPerMeter", ctypes.c_int32),
+                ("biYPelsPerMeter", ctypes.c_int32),
+                ("biClrUsed",       ctypes.c_uint32),
+                ("biClrImportant",  ctypes.c_uint32),
+            ]
+        bih = BITMAPINFOHEADER(
+            biSize=ctypes.sizeof(BITMAPINFOHEADER),
+            biWidth=size, biHeight=-size,  # negative = top-down
+            biPlanes=1, biBitCount=32, biCompression=0,
+        )
+        pixel_buf = (ctypes.c_char * (size * size * 4))()
+        rows = gdi32.GetDIBits(hdc_mem, hbmp, 0, size, pixel_buf, ctypes.byref(bih), 0)
+
+        gdi32.DeleteDC(hdc_mem)
+        user32.ReleaseDC(None, hdc_screen)
+        gdi32.DeleteObject(hbmp)
+
+        if not rows:
+            return None
+
+        img = Image.frombuffer("RGB", (size, size), bytes(pixel_buf), "raw", "BGRX", 0, 1)
         buf = io.BytesIO()
         img.save(buf, "PNG", optimize=True)
         return base64.b64encode(buf.getvalue()).decode()
-    except Exception:
-        return None
-
-
-def _extract_icon_b64(path, size=48):
-    if not _WIN32_OK:
-        return None
-    try:
-        large, small = win32gui.ExtractIconEx(str(path), 0)
-        icons = list(large) + list(small)
-        if not icons:
-            return None
-        result = _hicon_to_b64(icons[0], size)
-        for h in icons:
-            try:
-                win32gui.DestroyIcon(h)
-            except Exception:
-                pass
-        return result
     except Exception:
         return None
 
