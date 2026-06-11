@@ -223,6 +223,10 @@ def _exec_work(ws_conn, msg):
         else:
             args = ["bash", "-c", command]
 
+        extra = {}
+        if platform.system() == "Windows":
+            extra["creationflags"] = subprocess.CREATE_NO_WINDOW
+
         proc = subprocess.Popen(
             args,
             stdout=subprocess.PIPE,
@@ -231,6 +235,7 @@ def _exec_work(ws_conn, msg):
             encoding="utf-8",
             errors="replace",
             bufsize=1,
+            **extra,
         )
 
         stdout_done = threading.Event()

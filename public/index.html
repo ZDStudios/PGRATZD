@@ -116,7 +116,8 @@
       .fe-nav-btn { font-size: 13px; padding: 4px 9px; border-radius: 5px; border: 1px solid #2a2f37; background: #1a1e25; color: #9ca3af; cursor: pointer; transition: all .12s; white-space: nowrap; }
       .fe-nav-btn:hover:not(:disabled) { border-color: #4b5563; color: #e6e8eb; }
       .fe-nav-btn:disabled { opacity: .35; cursor: default; }
-      .fe-path-text { flex: 1; font-size: 12px; color: #6b7280; font-family: Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 60px; }
+      .fe-path-input { flex: 1; font-size: 12px; color: #c9d1da; font-family: Consolas, monospace; background: #0d0f12; border: 1px solid #1e2229; border-radius: 5px; padding: 3px 9px; outline: none; min-width: 60px; transition: border-color .15s; }
+      .fe-path-input:focus { border-color: #2f6fed; color: #e6e8eb; }
       .fe-act-btn { font-size: 12px; padding: 4px 10px; border-radius: 5px; border: 1px solid #2a2f37; background: #1a1e25; color: #9ca3af; cursor: pointer; transition: all .12s; white-space: nowrap; }
       .fe-act-btn:hover { border-color: #4b5563; color: #e6e8eb; }
       .fe-act-btn.primary { background: #1a2540; border-color: #2f6fed; color: #60a5fa; }
@@ -247,9 +248,13 @@
         <!-- Files tab -->
         <div class="view-tab" id="files-tab">
           <div class="fe-toolbar">
-            <button class="fe-nav-btn" id="fe-up-btn" onclick="feUp()">↑ Up</button>
+            <button class="fe-nav-btn" id="fe-back-btn" onclick="feBack()" disabled>←</button>
+            <button class="fe-nav-btn" id="fe-fwd-btn"  onclick="feForward()" disabled>→</button>
+            <button class="fe-nav-btn" id="fe-up-btn"   onclick="feUp()" disabled>↑</button>
             <button class="fe-nav-btn" onclick="feNavigate(null)">🏠</button>
-            <span class="fe-path-text" id="fe-path-text">—</span>
+            <input class="fe-path-input" id="fe-path-input" spellcheck="false" autocomplete="off"
+              placeholder="Type a path and press Enter…"
+              onkeydown="fePathKeyDown(event)" />
             <button class="fe-nav-btn" onclick="feRefresh()">↺</button>
             <button class="fe-act-btn" onclick="feNewFile()">+ File</button>
             <button class="fe-act-btn" onclick="feNewFolder()">+ Folder</button>
@@ -319,6 +324,7 @@
       let activeTab = "screen", controlActive = false, lastMouseSend = 0;
       let viewerPassword = localStorage.getItem("pgratzd_pw") || "";
       let fePath = null, feParent = null, feEntries = [];
+      let feHistory = [], feHistIdx = -1;
       let feReqId = 0; const fePending = new Map();
       let termHistory = [], termHistIdx = -1, termRunning = false;
       let termReqId = 0; const termPending = new Map();
@@ -388,7 +394,7 @@
       }
       function watchDevice(id) {
         if(!devices[id])return;
-        stopControl(); termClear(); watchingId=id; fePath=null; activeTab="screen";
+        stopControl(); termClear(); watchingId=id; fePath=null; feHistory=[]; feHistIdx=-1; activeTab="screen";
         $home.style.display="none"; $screenTab.classList.add("active"); $filesTab.classList.remove("active"); $terminalTab.classList.remove("active");
         $tabGroup.classList.add("show");
         document.querySelectorAll(".tab-btn").forEach(el=>el.classList.toggle("active",el.dataset.tab==="screen"));
@@ -423,8 +429,42 @@
       // ── File Explorer ─────────────────────────────────────────
       function fsSend(op,params={}){return new Promise((resolve,reject)=>{const id=++feReqId,timer=setTimeout(()=>{fePending.delete(id);reject(new Error("Timed out"));},20000);fePending.set(id,{resolve,reject,timer});if(ws&&ws.readyState===WebSocket.OPEN&&watchingId)ws.send(JSON.stringify({type:"fs_req",id,op,...params}));else{clearTimeout(timer);fePending.delete(id);reject(new Error("Not connected"));}});}
       function handleFsRes(m){const r=fePending.get(m.id);if(!r)return;clearTimeout(r.timer);fePending.delete(m.id);m.error?r.reject(new Error(m.error)):r.resolve(m);}
-      async function feNavigate(path){feSetState("Loading…");try{const r=await fsSend("list",path?{path}:{});fePath=r.path;feParent=r.parent;feEntries=r.entries;document.getElementById("fe-path-text").textContent=fePath;document.getElementById("fe-up-btn").disabled=!feParent;feRender();}catch(err){feSetState(err.message,true);}}
-      function feRefresh(){if(fePath)feNavigate(fePath);}
+      function feUpdateNav() {
+        document.getElementById("fe-back-btn").disabled = feHistIdx <= 0;
+        document.getElementById("fe-fwd-btn").disabled  = feHistIdx >= feHistory.length - 1;
+        document.getElementById("fe-up-btn").disabled   = !feParent;
+        const inp = document.getElementById("fe-path-input");
+        if (document.activeElement !== inp) inp.value = fePath || "";
+      }
+      async function feNavigate(path, opts={}) {
+        feSetState("Loading…");
+        try {
+          const r = await fsSend("list", path ? {path} : {});
+          fePath = r.path; feParent = r.parent; feEntries = r.entries;
+          if (!opts.skipHistory) {
+            feHistory = feHistory.slice(0, feHistIdx + 1);
+            feHistory.push(fePath);
+            feHistIdx = feHistory.length - 1;
+          }
+          feUpdateNav(); feRender();
+        } catch(err) { feSetState(err.message, true); }
+      }
+      async function feBack() {
+        if (feHistIdx <= 0) return;
+        feHistIdx--;
+        await feNavigate(feHistory[feHistIdx], {skipHistory: true});
+      }
+      async function feForward() {
+        if (feHistIdx >= feHistory.length - 1) return;
+        feHistIdx++;
+        await feNavigate(feHistory[feHistIdx], {skipHistory: true});
+      }
+      function fePathKeyDown(e) {
+        const inp = e.target;
+        if (e.key === "Enter") { const p = inp.value.trim(); if (p) feNavigate(p); }
+        if (e.key === "Escape") { inp.value = fePath || ""; inp.blur(); }
+      }
+      function feRefresh(){if(fePath)feNavigate(fePath,{skipHistory:true});}
       function feUp(){if(feParent)feNavigate(feParent);}
       const TEXT_EXTS=new Set(["txt","md","json","js","ts","jsx","tsx","py","css","html","htm","xml","yaml","yml","csv","log","sh","bat","ps1","env","toml","ini","cfg","conf","rs","go","java","c","cpp","h","rb","php","sql","vue","svelte","gitignore","gitattributes","editorconfig"]);
       const isText=name=>{const e=name.split(".").pop().toLowerCase();return TEXT_EXTS.has(e);};
