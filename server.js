@@ -93,7 +93,7 @@ wss.on("connection", (ws, req) => {
           vstate.watchingId = msg.id;
           const agent = agents.get(msg.id);
           if (agent?.lastFrame) ws.send(agent.lastFrame, { binary: true });
-        } else if ((msg.type === "control" || msg.type === "fs_req") && vstate.watchingId) {
+        } else if ((msg.type === "control" || msg.type === "fs_req" || msg.type === "exec_req") && vstate.watchingId) {
           const agent = agents.get(vstate.watchingId);
           if (agent?.ws.readyState === agent.ws.OPEN) {
             agent.ws.send(JSON.stringify(msg));

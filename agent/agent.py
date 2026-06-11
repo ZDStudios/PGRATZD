@@ -16,8 +16,10 @@ import io
 import json
 import os
 import pathlib
+import platform
 import shutil
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -203,6 +205,75 @@ def handle_fs_req(ws_conn, msg):
     threading.Thread(target=_fs_work, args=(ws_conn, msg), daemon=True).start()
 
 
+# ── Command execution ──────────────────────────────────────────────
+
+def _exec_work(ws_conn, msg):
+    req_id = msg.get("id")
+    command = (msg.get("command") or "").strip()
+
+    def send(data):
+        try:
+            ws_conn.send(json.dumps({"type": "exec_res", "id": req_id, **data}))
+        except Exception:
+            pass
+
+    if not command:
+        send({"done": True, "exitCode": 0})
+        return
+
+    try:
+        if platform.system() == "Windows":
+            # Prepend UTF-8 setup so output is readable
+            ps_cmd = f"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; {command}"
+            args = ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_cmd]
+        else:
+            args = ["bash", "-c", command]
+
+        proc = subprocess.Popen(
+            args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,
+        )
+
+        stdout_done = threading.Event()
+        stderr_done = threading.Event()
+
+        def pipe_reader(stream, stream_name, done_evt):
+            try:
+                for line in stream:
+                    send({"output": line, "stream": stream_name})
+            except Exception:
+                pass
+            finally:
+                done_evt.set()
+
+        threading.Thread(target=pipe_reader, args=(proc.stdout, "stdout", stdout_done), daemon=True).start()
+        threading.Thread(target=pipe_reader, args=(proc.stderr, "stderr", stderr_done), daemon=True).start()
+
+        # Wait up to 60 s for output to finish
+        stdout_done.wait(timeout=60)
+        stderr_done.wait(timeout=5)
+
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait()
+
+        send({"done": True, "exitCode": proc.returncode if proc.returncode is not None else 0})
+
+    except Exception as exc:
+        send({"output": f"Error: {exc}\n", "stream": "stderr", "done": True, "exitCode": -1})
+
+
+def handle_exec_req(ws_conn, msg):
+    threading.Thread(target=_exec_work, args=(ws_conn, msg), daemon=True).start()
+
+
 # ── WebSocket receive loop ─────────────────────────────────────────
 
 def recv_loop(ws_conn):
@@ -217,6 +288,8 @@ def recv_loop(ws_conn):
                 handle_control(msg)
             elif t == "fs_req":
                 handle_fs_req(ws_conn, msg)
+            elif t == "exec_req":
+                handle_exec_req(ws_conn, msg)
         except (json.JSONDecodeError, KeyError):
             pass
         except Exception:

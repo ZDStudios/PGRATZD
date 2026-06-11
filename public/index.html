@@ -9,20 +9,12 @@
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
         font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-        background: #0d0f12;
-        color: #e6e8eb;
-        display: flex;
-        height: 100vh;
-        overflow: hidden;
+        background: #0d0f12; color: #e6e8eb;
+        display: flex; height: 100vh; overflow: hidden;
       }
 
-      /* ── Sidebar ────────────────────────────────── */
-      aside {
-        width: 230px; flex-shrink: 0;
-        background: #13161b;
-        border-right: 1px solid #1e2229;
-        display: flex; flex-direction: column;
-      }
+      /* ── Sidebar ── */
+      aside { width: 230px; flex-shrink: 0; background: #13161b; border-right: 1px solid #1e2229; display: flex; flex-direction: column; }
       .sidebar-top { padding: 18px 16px 12px; border-bottom: 1px solid #1e2229; }
       .logo { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
       .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #2f6fed; }
@@ -42,22 +34,18 @@
       .conn-dot { width: 6px; height: 6px; border-radius: 50%; background: #4b5563; flex-shrink: 0; transition: background .3s; }
       .conn-dot.ok { background: #22c55e; }
 
-      /* ── Main ───────────────────────────────────── */
+      /* ── Main ── */
       main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
       .topbar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: #13161b; border-bottom: 1px solid #1e2229; flex-shrink: 0; }
       .back-btn { font-size: 12px; color: #6b7280; cursor: pointer; padding: 4px 8px; border-radius: 5px; transition: background .12s, color .12s; display: none; user-select: none; }
       .back-btn:hover { background: #1e2229; color: #e6e8eb; }
       .back-btn.show { display: inline; }
       .topbar-title { font-size: 14px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-      /* Tabs */
       .tab-group { display: none; gap: 2px; background: #0d0f12; padding: 3px; border-radius: 7px; }
       .tab-group.show { display: flex; }
       .tab-btn { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 5px; border: none; background: transparent; color: #6b7280; cursor: pointer; transition: background .12s, color .12s; user-select: none; }
       .tab-btn:hover { color: #e6e8eb; }
       .tab-btn.active { background: #1e2229; color: #e6e8eb; }
-
-      /* Badge & control button */
       .badge { font-size: 10px; font-weight: 700; letter-spacing: .07em; padding: 3px 8px; border-radius: 5px; display: none; }
       .badge.live { background: #166534; color: #4ade80; display: inline; }
       .badge.waiting { background: #1e2229; color: #9ca3af; display: inline; }
@@ -67,7 +55,7 @@
       .ctrl-btn.on { background: #450a0a; border-color: #ef4444; color: #fca5a5; }
       .ctrl-btn.on:hover { background: #7f1d1d; }
 
-      /* ── Content area ───────────────────────────── */
+      /* ── Content ── */
       .content { flex: 1; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
 
       /* Home */
@@ -85,40 +73,30 @@
       .empty-hint { color: #4b5563; font-size: 13px; line-height: 1.8; }
       .empty-hint code { font-size: 12px; background: #1e2229; padding: 2px 6px; border-radius: 4px; color: #9ca3af; }
 
-      /* Screen tab */
+      /* View tabs */
       .view-tab { position: absolute; inset: 0; display: none; }
       #screen-tab.active { display: block; }
-      #files-tab.active { display: flex; flex-direction: column; }
+      #files-tab.active, #terminal-tab.active { display: flex; flex-direction: column; }
 
-      #stream-img {
-        position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px;
-        width: calc(100% - 24px); height: calc(100% - 24px);
-        object-fit: contain; border-radius: 8px; border: 1px solid #1e2229; display: none;
-        transition: border-color .2s;
-      }
+      /* Screen */
+      #stream-img { position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px; width: calc(100% - 24px); height: calc(100% - 24px); object-fit: contain; border-radius: 8px; border: 1px solid #1e2229; display: none; transition: border-color .2s; }
       #stream-img.controlling { border-color: #ef4444; cursor: crosshair; box-shadow: 0 0 0 1px #ef444433; }
       .overlay-msg { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 13px; color: #6b7280; }
       .overlay-msg.show { display: flex; }
 
-      /* ── File Explorer ──────────────────────────── */
-      .fe-toolbar {
-        display: flex; align-items: center; gap: 6px;
-        padding: 8px 14px; background: #13161b; border-bottom: 1px solid #1e2229;
-        flex-shrink: 0; flex-wrap: wrap;
-      }
+      /* ── File Explorer ── */
+      .fe-toolbar { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: #13161b; border-bottom: 1px solid #1e2229; flex-shrink: 0; flex-wrap: wrap; }
       .fe-nav-btn { font-size: 13px; padding: 4px 9px; border-radius: 5px; border: 1px solid #2a2f37; background: #1a1e25; color: #9ca3af; cursor: pointer; transition: all .12s; white-space: nowrap; }
       .fe-nav-btn:hover:not(:disabled) { border-color: #4b5563; color: #e6e8eb; }
       .fe-nav-btn:disabled { opacity: .35; cursor: default; }
-      .fe-path-text { flex: 1; font-size: 12px; color: #6b7280; font-family: Consolas, 'Cascadia Code', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 60px; }
+      .fe-path-text { flex: 1; font-size: 12px; color: #6b7280; font-family: Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 60px; }
       .fe-act-btn { font-size: 12px; padding: 4px 10px; border-radius: 5px; border: 1px solid #2a2f37; background: #1a1e25; color: #9ca3af; cursor: pointer; transition: all .12s; white-space: nowrap; }
       .fe-act-btn:hover { border-color: #4b5563; color: #e6e8eb; }
       .fe-act-btn.primary { background: #1a2540; border-color: #2f6fed; color: #60a5fa; }
       .fe-act-btn.primary:hover { background: #162035; border-color: #4480f5; color: #93c5fd; }
-
       .fe-body { flex: 1; overflow-y: auto; }
       .fe-state { padding: 40px 20px; text-align: center; font-size: 13px; color: #6b7280; }
       .fe-state.error { color: #f87171; }
-
       .fe-table { width: 100%; border-collapse: collapse; }
       .fe-table th { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #4b5563; text-align: left; padding: 6px 14px; border-bottom: 1px solid #1e2229; white-space: nowrap; }
       .fe-table td { padding: 6px 14px; font-size: 13px; vertical-align: middle; border-bottom: 1px solid #13161b; }
@@ -136,13 +114,33 @@
       .fe-btn { font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid transparent; background: transparent; color: #6b7280; cursor: pointer; white-space: nowrap; transition: all .1s; }
       .fe-btn:hover { border-color: #2a2f37; color: #e6e8eb; background: #1a1e25; }
       .fe-btn.del:hover { border-color: #7f1d1d; color: #f87171; background: #450a0a; }
-
       .fe-statusbar { padding: 5px 14px; border-top: 1px solid #1e2229; flex-shrink: 0; min-height: 26px; }
       .fe-status { font-size: 11px; color: #6b7280; }
       .fe-status.ok { color: #4ade80; }
       .fe-status.error { color: #f87171; }
 
-      /* ── Edit Modal ─────────────────────────────── */
+      /* ── Terminal ── */
+      #terminal-tab { background: #080a0d; }
+      .term-output { flex: 1; overflow-y: auto; padding: 14px 18px; font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace; font-size: 13px; line-height: 1.55; }
+      .term-block { margin-bottom: 14px; }
+      .term-cmd-line { color: #7dd3fc; margin-bottom: 1px; }
+      .term-cmd-line::before { content: "PS> "; color: #374151; }
+      .term-stdout { color: #d1d5db; white-space: pre-wrap; word-break: break-word; margin: 0; }
+      .term-stderr { color: #fca5a5; white-space: pre-wrap; word-break: break-word; margin: 0; }
+      .term-running { color: #4b5563; font-style: italic; }
+      .term-exit { font-size: 11px; margin-top: 3px; }
+      .term-exit.ok   { color: #14532d; }
+      .term-exit.fail { color: #7f1d1d; }
+      .term-input-row { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-top: 1px solid #1a1e25; background: #0d0f12; flex-shrink: 0; }
+      .term-prompt { font-size: 13px; color: #374151; font-family: Consolas, monospace; user-select: none; white-space: nowrap; }
+      .term-input-field { flex: 1; background: transparent; border: none; color: #e6e8eb; font-family: 'Cascadia Code', Consolas, monospace; font-size: 13px; outline: none; caret-color: #60a5fa; }
+      .term-run-btn { font-size: 12px; padding: 5px 14px; border-radius: 5px; border: 1px solid #2f6fed; background: #1a2540; color: #60a5fa; cursor: pointer; white-space: nowrap; transition: all .12s; }
+      .term-run-btn:hover { background: #162035; border-color: #4480f5; }
+      .term-run-btn:disabled { opacity: .4; cursor: default; }
+      .term-clear-btn { font-size: 12px; padding: 5px 10px; border-radius: 5px; border: 1px solid #2a2f37; background: transparent; color: #6b7280; cursor: pointer; }
+      .term-clear-btn:hover { border-color: #4b5563; color: #e6e8eb; }
+
+      /* ── Edit Modal ── */
       .fe-modal-overlay { position: fixed; inset: 0; background: #000000bb; display: none; align-items: center; justify-content: center; z-index: 200; }
       .fe-modal-overlay.open { display: flex; }
       .fe-modal-bg { position: absolute; inset: 0; }
@@ -152,7 +150,7 @@
       .fe-modal-close { background: none; border: none; color: #6b7280; font-size: 16px; cursor: pointer; padding: 2px 7px; border-radius: 4px; line-height: 1; }
       .fe-modal-close:hover { color: #e6e8eb; background: #1e2229; }
       .fe-modal-body { flex: 1; overflow: hidden; }
-      #fe-modal-textarea { width: 100%; height: 100%; background: #0d0f12; border: none; color: #e6e8eb; font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace; font-size: 13px; line-height: 1.65; padding: 16px 18px; resize: none; outline: none; tab-size: 4; }
+      #fe-modal-textarea { width: 100%; height: 100%; background: #0d0f12; border: none; color: #e6e8eb; font-family: 'Cascadia Code', Consolas, monospace; font-size: 13px; line-height: 1.65; padding: 16px 18px; resize: none; outline: none; tab-size: 4; }
       .fe-modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 18px; border-top: 1px solid #1e2229; flex-shrink: 0; }
       .fe-modal-save { padding: 6px 18px; border-radius: 6px; border: none; background: #2f6fed; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; }
       .fe-modal-save:hover { background: #4480f5; }
@@ -161,16 +159,14 @@
     </style>
   </head>
   <body>
-    <!-- ── Sidebar ── -->
+    <!-- Sidebar -->
     <aside>
       <div class="sidebar-top">
         <div class="logo"><div class="logo-dot"></div>Screen Stream</div>
       </div>
       <div class="section-label">Devices</div>
       <div class="device-list" id="device-list">
-        <div class="no-devices" id="no-devices">
-          No devices online.<br>Run <code>agent.py</code> on a machine.
-        </div>
+        <div class="no-devices" id="no-devices">No devices online.<br>Run <code>agent.py</code> on a machine.</div>
       </div>
       <div class="sidebar-footer">
         <div class="conn-dot" id="conn-dot"></div>
@@ -178,14 +174,15 @@
       </div>
     </aside>
 
-    <!-- ── Main ── -->
+    <!-- Main -->
     <main>
       <div class="topbar">
         <span class="back-btn" id="back-btn" onclick="showHome()">&#8592; Home</span>
         <div class="topbar-title" id="topbar-title">Screen Stream</div>
         <div class="tab-group" id="tab-group">
-          <button class="tab-btn active" data-tab="screen" onclick="switchTab('screen')">Screen</button>
-          <button class="tab-btn" data-tab="files" onclick="switchTab('files')">Files</button>
+          <button class="tab-btn active" data-tab="screen"   onclick="switchTab('screen')">Screen</button>
+          <button class="tab-btn"        data-tab="files"    onclick="switchTab('files')">Files</button>
+          <button class="tab-btn"        data-tab="terminal" onclick="switchTab('terminal')">Terminal</button>
         </div>
         <button class="ctrl-btn" id="ctrl-btn" onclick="toggleControl()">Enable Control</button>
         <span class="badge" id="badge"></span>
@@ -210,24 +207,35 @@
         <!-- Files tab -->
         <div class="view-tab" id="files-tab">
           <div class="fe-toolbar">
-            <button class="fe-nav-btn" id="fe-up-btn" title="Go up" onclick="feUp()">↑ Up</button>
-            <button class="fe-nav-btn" title="Home directory" onclick="feNavigate(null)">🏠</button>
+            <button class="fe-nav-btn" id="fe-up-btn" onclick="feUp()">↑ Up</button>
+            <button class="fe-nav-btn" onclick="feNavigate(null)">🏠</button>
             <span class="fe-path-text" id="fe-path-text">—</span>
-            <button class="fe-nav-btn" title="Refresh" onclick="feRefresh()">↺</button>
+            <button class="fe-nav-btn" onclick="feRefresh()">↺</button>
             <button class="fe-act-btn" onclick="feNewFile()">+ File</button>
             <button class="fe-act-btn" onclick="feNewFolder()">+ Folder</button>
             <button class="fe-act-btn primary" onclick="feUploadClick()">↑ Upload</button>
             <input type="file" id="fe-upload-input" multiple style="display:none" onchange="handleUpload(event)" />
           </div>
-          <div class="fe-body" id="fe-body">
-            <div class="fe-state">Select a device and open the Files tab to browse.</div>
-          </div>
+          <div class="fe-body" id="fe-body"><div class="fe-state">Open the Files tab while viewing a device.</div></div>
           <div class="fe-statusbar"><span class="fe-status" id="fe-status"></span></div>
+        </div>
+
+        <!-- Terminal tab -->
+        <div class="view-tab" id="terminal-tab">
+          <div class="term-output" id="term-output"></div>
+          <div class="term-input-row">
+            <span class="term-prompt">PS&gt;</span>
+            <input class="term-input-field" id="term-input" type="text"
+              placeholder="Enter PowerShell command…" autocomplete="off" spellcheck="false"
+              onkeydown="termKeyDown(event)" />
+            <button class="term-run-btn" id="term-run-btn" onclick="termRun()">Run</button>
+            <button class="term-clear-btn" onclick="termClear()">Clear</button>
+          </div>
         </div>
       </div>
     </main>
 
-    <!-- ── Edit Modal ── -->
+    <!-- Edit Modal -->
     <div class="fe-modal-overlay" id="fe-modal-overlay">
       <div class="fe-modal-bg" onclick="closeEditModal()"></div>
       <div class="fe-modal">
@@ -235,9 +243,7 @@
           <span class="fe-modal-title" id="fe-modal-title">Edit</span>
           <button class="fe-modal-close" onclick="closeEditModal()">✕</button>
         </div>
-        <div class="fe-modal-body">
-          <textarea id="fe-modal-textarea" spellcheck="false"></textarea>
-        </div>
+        <div class="fe-modal-body"><textarea id="fe-modal-textarea" spellcheck="false"></textarea></div>
         <div class="fe-modal-footer">
           <button class="fe-modal-cancel" onclick="closeEditModal()">Cancel</button>
           <button class="fe-modal-save" onclick="saveEditModal()">Save</button>
@@ -263,459 +269,282 @@
       const $tabGroup    = document.getElementById("tab-group");
       const $screenTab   = document.getElementById("screen-tab");
       const $filesTab    = document.getElementById("files-tab");
+      const $terminalTab = document.getElementById("terminal-tab");
+      const $termOutput  = document.getElementById("term-output");
+      const $termInput   = document.getElementById("term-input");
+      const $termRunBtn  = document.getElementById("term-run-btn");
 
-      // ── State ─────────────────────────────────────────────────
-      let ws = null;
-      let devices = {};
-      let watchingId = null;
-      let currentUrl = null;
-      let activeTab = "screen";
-      let controlActive = false;
-      let lastMouseSend = 0;
+      // ── App state ─────────────────────────────────────────────
+      let ws = null, devices = {}, watchingId = null, currentUrl = null;
+      let activeTab = "screen", controlActive = false, lastMouseSend = 0;
 
       // File explorer state
-      let fePath = null;
-      let feParent = null;
-      let feEntries = [];
+      let fePath = null, feParent = null, feEntries = [];
       let feReqId = 0;
       const fePending = new Map();
 
-      // ── Utilities ─────────────────────────────────────────────
-      function esc(s) {
-        return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-      }
-      function timeAgo(ts) {
-        const s = Math.floor((Date.now() - ts) / 1000);
-        return s < 60 ? `${s}s` : s < 3600 ? `${Math.floor(s/60)}m` : `${Math.floor(s/3600)}h`;
-      }
-      function fmtSize(b) {
-        if (b == null) return "—";
-        if (b < 1024) return `${b} B`;
-        if (b < 1048576) return `${(b/1024).toFixed(1)} KB`;
-        if (b < 1073741824) return `${(b/1048576).toFixed(1)} MB`;
-        return `${(b/1073741824).toFixed(1)} GB`;
-      }
-      function fmtDate(ms) {
-        if (!ms) return "—";
-        return new Date(ms).toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" });
-      }
-      function joinPath(base, name) {
-        const sep = base.includes("\\") ? "\\" : "/";
-        return base.endsWith(sep) ? base + name : base + sep + name;
-      }
-      function setBadge(state) {
-        $badge.className = "badge";
-        if (state === "live")    { $badge.classList.add("live");    $badge.textContent = "LIVE"; }
-        if (state === "waiting") { $badge.classList.add("waiting"); $badge.textContent = "Waiting…"; }
-      }
+      // Terminal state
+      let termHistory = [], termHistIdx = -1, termRunning = false;
+      let termReqId = 0;
+      const termPending = new Map();
 
-      // Base64 helpers safe for large files
-      function uint8ToB64(bytes) {
-        let s = "", c = 8192;
-        for (let i = 0; i < bytes.length; i += c)
-          s += String.fromCharCode(...bytes.subarray(i, i + c));
-        return btoa(s);
-      }
-      function b64ToUint8(b64) {
-        const bin = atob(b64);
-        const out = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-        return out;
-      }
+      // ── Utilities ─────────────────────────────────────────────
+      const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      const timeAgo = ts => { const s=Math.floor((Date.now()-ts)/1000); return s<60?`${s}s`:s<3600?`${Math.floor(s/60)}m`:`${Math.floor(s/3600)}h`; };
+      const fmtSize = b => { if(b==null)return"—"; if(b<1024)return`${b} B`; if(b<1048576)return`${(b/1024).toFixed(1)} KB`; if(b<1073741824)return`${(b/1048576).toFixed(1)} MB`; return`${(b/1073741824).toFixed(1)} GB`; };
+      const fmtDate = ms => ms ? new Date(ms).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—";
+      const joinPath = (base,name) => { const sep=base.includes("\\")?"\\":"/"; return base.endsWith(sep)?base+name:base+sep+name; };
+      function setBadge(s) { $badge.className="badge"; if(s==="live"){$badge.classList.add("live");$badge.textContent="LIVE";} if(s==="waiting"){$badge.classList.add("waiting");$badge.textContent="Waiting…";} }
+      function uint8ToB64(b) { let s="",c=8192; for(let i=0;i<b.length;i+=c)s+=String.fromCharCode(...b.subarray(i,i+c)); return btoa(s); }
+      function b64ToUint8(b64) { const bin=atob(b64),out=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i); return out; }
 
       // ── Sidebar ───────────────────────────────────────────────
       function renderSidebar() {
         const ids = Object.keys(devices);
         $noDevices.style.display = ids.length ? "none" : "block";
-        const existing = new Set([...$deviceList.querySelectorAll(".device-item")].map(el => el.dataset.id));
-        for (const id of existing) if (!devices[id]) $deviceList.querySelector(`[data-id="${id}"]`).remove();
-        for (const id of ids) {
-          const d = devices[id];
-          let el = $deviceList.querySelector(`[data-id="${id}"]`);
-          if (!el) {
-            el = document.createElement("div");
-            el.className = "device-item"; el.dataset.id = id;
-            el.innerHTML = `<div class="live-dot"></div><div class="device-info"><div class="device-name"></div><div class="device-meta"></div></div>`;
-            el.addEventListener("click", () => watchDevice(id));
-            $deviceList.appendChild(el);
-          }
-          el.querySelector(".device-name").textContent = d.name;
-          el.querySelector(".device-meta").textContent = `Live · ${timeAgo(d.connectedAt)} ago`;
-          el.classList.toggle("active", id === watchingId);
+        const existing = new Set([...$deviceList.querySelectorAll(".device-item")].map(el=>el.dataset.id));
+        for(const id of existing) if(!devices[id]) $deviceList.querySelector(`[data-id="${id}"]`).remove();
+        for(const id of ids) {
+          const d=devices[id]; let el=$deviceList.querySelector(`[data-id="${id}"]`);
+          if(!el) { el=document.createElement("div"); el.className="device-item"; el.dataset.id=id; el.innerHTML=`<div class="live-dot"></div><div class="device-info"><div class="device-name"></div><div class="device-meta"></div></div>`; el.addEventListener("click",()=>watchDevice(id)); $deviceList.appendChild(el); }
+          el.querySelector(".device-name").textContent=d.name;
+          el.querySelector(".device-meta").textContent=`Live · ${timeAgo(d.connectedAt)} ago`;
+          el.classList.toggle("active",id===watchingId);
         }
       }
       function renderHome() {
-        const ids = Object.keys(devices);
-        if (!ids.length) {
-          $homeSub.textContent = "Waiting for devices to connect…";
-          $deviceGrid.innerHTML = `<div class="empty-hint">Start <code>agent.py</code> on any machine<br>and it will appear here automatically.</div>`;
-        } else {
-          $homeSub.textContent = `${ids.length} device${ids.length > 1 ? "s" : ""} online — click one to view`;
-          $deviceGrid.innerHTML = ids.map(id => {
-            const d = devices[id];
-            return `<div class="device-card" data-id="${esc(id)}">
-              <div class="card-indicator"><div class="card-dot"></div><span class="card-live">LIVE</span></div>
-              <div class="card-name">${esc(d.name)}</div>
-              <div class="card-meta">Connected ${timeAgo(d.connectedAt)} ago</div>
-            </div>`;
-          }).join("");
-          $deviceGrid.querySelectorAll(".device-card").forEach(el =>
-            el.addEventListener("click", () => watchDevice(el.dataset.id))
-          );
-        }
+        const ids=Object.keys(devices);
+        if(!ids.length) { $homeSub.textContent="Waiting for devices to connect…"; $deviceGrid.innerHTML=`<div class="empty-hint">Start <code>agent.py</code> on any machine<br>and it will appear here automatically.</div>`; return; }
+        $homeSub.textContent=`${ids.length} device${ids.length>1?"s":""} online — click one to view`;
+        $deviceGrid.innerHTML=ids.map(id=>`<div class="device-card" data-id="${esc(id)}"><div class="card-indicator"><div class="card-dot"></div><span class="card-live">LIVE</span></div><div class="card-name">${esc(devices[id].name)}</div><div class="card-meta">Connected ${timeAgo(devices[id].connectedAt)} ago</div></div>`).join("");
+        $deviceGrid.querySelectorAll(".device-card").forEach(el=>el.addEventListener("click",()=>watchDevice(el.dataset.id)));
       }
 
       // ── Navigation ────────────────────────────────────────────
       function showHome() {
-        stopControl();
-        watchingId = null; fePath = null; activeTab = "screen";
-        $home.style.display = "block";
-        $screenTab.classList.remove("active");
-        $filesTab.classList.remove("active");
-        $tabGroup.classList.remove("show");
-        $topbarTitle.textContent = "Screen Stream";
-        $badge.className = "badge";
-        $backBtn.classList.remove("show");
-        $ctrlBtn.classList.remove("show");
+        stopControl(); watchingId=null; fePath=null; activeTab="screen";
+        $home.style.display="block";
+        $screenTab.classList.remove("active"); $filesTab.classList.remove("active"); $terminalTab.classList.remove("active");
+        $tabGroup.classList.remove("show"); $topbarTitle.textContent="Screen Stream";
+        $badge.className="badge"; $backBtn.classList.remove("show"); $ctrlBtn.classList.remove("show");
         renderSidebar(); renderHome();
       }
-
       function watchDevice(id) {
-        if (!devices[id]) return;
-        stopControl();
-        watchingId = id; fePath = null; activeTab = "screen";
-        $home.style.display = "none";
-        $screenTab.classList.add("active");
-        $filesTab.classList.remove("active");
+        if(!devices[id]) return;
+        stopControl(); termClear(); watchingId=id; fePath=null; activeTab="screen";
+        $home.style.display="none";
+        $screenTab.classList.add("active"); $filesTab.classList.remove("active"); $terminalTab.classList.remove("active");
         $tabGroup.classList.add("show");
-        document.querySelectorAll(".tab-btn").forEach(el => el.classList.toggle("active", el.dataset.tab === "screen"));
-        $overlayMsg.className = "overlay-msg show"; $overlayMsg.textContent = "Waiting for first frame…";
-        $streamImg.style.display = "none";
-        $topbarTitle.textContent = devices[id].name;
-        $backBtn.classList.add("show");
-        $ctrlBtn.classList.add("show");
-        setBadge("waiting");
-        renderSidebar();
-        if (ws && ws.readyState === WebSocket.OPEN)
-          ws.send(JSON.stringify({ type: "watch", id }));
+        document.querySelectorAll(".tab-btn").forEach(el=>el.classList.toggle("active",el.dataset.tab==="screen"));
+        $overlayMsg.className="overlay-msg show"; $overlayMsg.textContent="Waiting for first frame…";
+        $streamImg.style.display="none"; $topbarTitle.textContent=devices[id].name;
+        $backBtn.classList.add("show"); $ctrlBtn.classList.add("show");
+        setBadge("waiting"); renderSidebar();
+        if(ws&&ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:"watch",id}));
       }
-
       function switchTab(tab) {
-        activeTab = tab;
-        document.querySelectorAll(".tab-btn").forEach(el => el.classList.toggle("active", el.dataset.tab === tab));
-        $screenTab.classList.toggle("active", tab === "screen");
-        $filesTab.classList.toggle("active", tab === "files");
-        if (tab === "files" && watchingId && !fePath) feNavigate(null);
+        activeTab=tab;
+        document.querySelectorAll(".tab-btn").forEach(el=>el.classList.toggle("active",el.dataset.tab===tab));
+        $screenTab.classList.toggle("active",tab==="screen");
+        $filesTab.classList.toggle("active",tab==="files");
+        $terminalTab.classList.toggle("active",tab==="terminal");
+        if(tab==="files"&&watchingId&&!fePath) feNavigate(null);
+        if(tab==="terminal") setTimeout(()=>$termInput.focus(),50);
       }
 
       // ── Remote Control ────────────────────────────────────────
-      function sendControl(msg) {
-        if (ws && ws.readyState === WebSocket.OPEN && watchingId)
-          ws.send(JSON.stringify({ type: "control", ...msg }));
-      }
-      function releaseModifiers() {
-        for (const c of ["ShiftLeft","ShiftRight","ControlLeft","ControlRight","AltLeft","AltRight","MetaLeft","MetaRight"])
-          sendControl({ event: "keyup", code: c });
-      }
+      function sendControl(msg) { if(ws&&ws.readyState===WebSocket.OPEN&&watchingId) ws.send(JSON.stringify({type:"control",...msg})); }
+      function releaseModifiers() { for(const c of["ShiftLeft","ShiftRight","ControlLeft","ControlRight","AltLeft","AltRight","MetaLeft","MetaRight"]) sendControl({event:"keyup",code:c}); }
       function stopControl() {
-        if (!controlActive) return;
-        releaseModifiers(); controlActive = false;
-        $ctrlBtn.className = "ctrl-btn show"; $ctrlBtn.textContent = "Enable Control";
+        if(!controlActive) return; releaseModifiers(); controlActive=false;
+        $ctrlBtn.className="ctrl-btn show"; $ctrlBtn.textContent="Enable Control";
         $streamImg.classList.remove("controlling");
-        document.removeEventListener("keydown", onKeyDown, true);
-        document.removeEventListener("keyup", onKeyUp, true);
+        document.removeEventListener("keydown",onKeyDown,true); document.removeEventListener("keyup",onKeyUp,true);
       }
       function toggleControl() {
-        if (controlActive) { stopControl(); return; }
-        controlActive = true;
-        $ctrlBtn.className = "ctrl-btn show on"; $ctrlBtn.textContent = "Disable Control";
+        if(controlActive){stopControl();return;}
+        controlActive=true; $ctrlBtn.className="ctrl-btn show on"; $ctrlBtn.textContent="Disable Control";
         $streamImg.classList.add("controlling");
-        document.addEventListener("keydown", onKeyDown, true);
-        document.addEventListener("keyup", onKeyUp, true);
+        document.addEventListener("keydown",onKeyDown,true); document.addEventListener("keyup",onKeyUp,true);
       }
       function imgCoords(e) {
-        if (!$streamImg.naturalWidth) return null;
-        const r = $streamImg.getBoundingClientRect();
-        const ir = $streamImg.naturalWidth / $streamImg.naturalHeight;
-        const br = r.width / r.height;
-        let ix, iy, iw, ih;
-        if (ir >= br) { iw = r.width; ih = r.width/ir; ix = r.left; iy = r.top+(r.height-ih)/2; }
-        else          { ih = r.height; iw = r.height*ir; iy = r.top; ix = r.left+(r.width-iw)/2; }
-        const x = (e.clientX-ix)/iw, y = (e.clientY-iy)/ih;
-        return (x<0||x>1||y<0||y>1) ? null : {x,y};
+        if(!$streamImg.naturalWidth) return null;
+        const r=$streamImg.getBoundingClientRect(),ir=$streamImg.naturalWidth/$streamImg.naturalHeight,br=r.width/r.height;
+        let ix,iy,iw,ih;
+        if(ir>=br){iw=r.width;ih=r.width/ir;ix=r.left;iy=r.top+(r.height-ih)/2;}
+        else{ih=r.height;iw=r.height*ir;iy=r.top;ix=r.left+(r.width-iw)/2;}
+        const x=(e.clientX-ix)/iw,y=(e.clientY-iy)/ih;
+        return(x<0||x>1||y<0||y>1)?null:{x,y};
       }
-      $streamImg.addEventListener("mousemove", e => {
-        if (!controlActive) return;
-        const now = Date.now(); if (now - lastMouseSend < 33) return; lastMouseSend = now;
-        const c = imgCoords(e); if (c) sendControl({ event:"mousemove",...c });
-      });
-      $streamImg.addEventListener("mousedown", e => {
-        if (!controlActive) return; e.preventDefault();
-        const c = imgCoords(e); if (!c) return;
-        sendControl({ event:"mousemove",...c }); sendControl({ event:"mousedown", button:e.button,...c });
-      });
-      $streamImg.addEventListener("mouseup", e => {
-        if (!controlActive) return; e.preventDefault();
-        const c = imgCoords(e); sendControl({ event:"mouseup", button:e.button,...(c||{}) });
-      });
-      $streamImg.addEventListener("contextmenu", e => { if (controlActive) e.preventDefault(); });
-      $streamImg.addEventListener("wheel", e => {
-        if (!controlActive) return; e.preventDefault();
-        sendControl({ event:"scroll", dy:e.deltaY, mode:e.deltaMode });
-      }, { passive: false });
-      function onKeyDown(e) { e.preventDefault(); e.stopPropagation(); sendControl({ event:"keydown", code:e.code }); }
-      function onKeyUp(e)   { e.preventDefault(); e.stopPropagation(); sendControl({ event:"keyup",   code:e.code }); }
+      $streamImg.addEventListener("mousemove",e=>{if(!controlActive)return;const now=Date.now();if(now-lastMouseSend<33)return;lastMouseSend=now;const c=imgCoords(e);if(c)sendControl({event:"mousemove",...c});});
+      $streamImg.addEventListener("mousedown",e=>{if(!controlActive)return;e.preventDefault();const c=imgCoords(e);if(!c)return;sendControl({event:"mousemove",...c});sendControl({event:"mousedown",button:e.button,...c});});
+      $streamImg.addEventListener("mouseup",e=>{if(!controlActive)return;e.preventDefault();const c=imgCoords(e);sendControl({event:"mouseup",button:e.button,...(c||{})});});
+      $streamImg.addEventListener("contextmenu",e=>{if(controlActive)e.preventDefault();});
+      $streamImg.addEventListener("wheel",e=>{if(!controlActive)return;e.preventDefault();sendControl({event:"scroll",dy:e.deltaY,mode:e.deltaMode});},{passive:false});
+      function onKeyDown(e){e.preventDefault();e.stopPropagation();sendControl({event:"keydown",code:e.code});}
+      function onKeyUp(e){e.preventDefault();e.stopPropagation();sendControl({event:"keyup",code:e.code});}
 
       // ── File Explorer ─────────────────────────────────────────
-      function fsSend(op, params = {}) {
-        return new Promise((resolve, reject) => {
-          const id = ++feReqId;
-          const timer = setTimeout(() => { fePending.delete(id); reject(new Error("Request timed out")); }, 20000);
-          fePending.set(id, { resolve, reject, timer });
-          if (ws && ws.readyState === WebSocket.OPEN && watchingId)
-            ws.send(JSON.stringify({ type:"fs_req", id, op, ...params }));
-          else reject(new Error("Not connected"));
+      function fsSend(op,params={}) {
+        return new Promise((resolve,reject)=>{
+          const id=++feReqId,timer=setTimeout(()=>{fePending.delete(id);reject(new Error("Timed out"));},20000);
+          fePending.set(id,{resolve,reject,timer});
+          if(ws&&ws.readyState===WebSocket.OPEN&&watchingId) ws.send(JSON.stringify({type:"fs_req",id,op,...params}));
+          else{clearTimeout(timer);fePending.delete(id);reject(new Error("Not connected"));}
         });
       }
-      function handleFsRes(m) {
-        const req = fePending.get(m.id);
-        if (!req) return;
-        clearTimeout(req.timer); fePending.delete(m.id);
-        m.error ? req.reject(new Error(m.error)) : req.resolve(m);
-      }
+      function handleFsRes(m) { const r=fePending.get(m.id); if(!r)return; clearTimeout(r.timer); fePending.delete(m.id); m.error?r.reject(new Error(m.error)):r.resolve(m); }
 
       async function feNavigate(path) {
         feSetState("Loading…");
-        try {
-          const res = await fsSend("list", path ? { path } : {});
-          fePath = res.path; feParent = res.parent; feEntries = res.entries;
-          document.getElementById("fe-path-text").textContent = fePath;
-          document.getElementById("fe-up-btn").disabled = !feParent;
-          feRender();
-        } catch (err) { feSetState(err.message, true); }
+        try { const r=await fsSend("list",path?{path}:{}); fePath=r.path;feParent=r.parent;feEntries=r.entries; document.getElementById("fe-path-text").textContent=fePath; document.getElementById("fe-up-btn").disabled=!feParent; feRender(); }
+        catch(err){feSetState(err.message,true);}
       }
-      function feRefresh() { if (fePath) feNavigate(fePath); }
-      function feUp()      { if (feParent) feNavigate(feParent); }
-
-      const TEXT_EXTS = new Set(["txt","md","json","js","ts","jsx","tsx","py","css","html","htm","xml","yaml","yml","csv","log","sh","bat","ps1","env","toml","ini","cfg","conf","rs","go","java","c","cpp","h","rb","php","sql","vue","svelte","gitignore","gitattributes","editorconfig","prettierrc","eslintrc"]);
-      function isText(name) { const e = name.split(".").pop().toLowerCase(); return TEXT_EXTS.has(e); }
-      function fileIcon(name) {
-        const e = name.split(".").pop().toLowerCase();
-        if (["jpg","jpeg","png","gif","webp","svg","bmp"].includes(e)) return "🖼️";
-        if (["mp4","mov","avi","mkv","webm"].includes(e)) return "🎬";
-        if (["mp3","wav","ogg","flac","aac"].includes(e)) return "🎵";
-        if (["zip","rar","7z","tar","gz","bz2"].includes(e)) return "📦";
-        if (e === "pdf") return "📄";
-        if (["exe","msi","dmg"].includes(e)) return "⚙️";
-        if (TEXT_EXTS.has(e)) return "📝";
-        return "📄";
-      }
-
-      function feSetState(msg, isError = false) {
-        document.getElementById("fe-body").innerHTML = `<div class="fe-state${isError?" error":""}">${esc(msg)}</div>`;
-      }
-
+      function feRefresh(){if(fePath)feNavigate(fePath);}
+      function feUp(){if(feParent)feNavigate(feParent);}
+      const TEXT_EXTS=new Set(["txt","md","json","js","ts","jsx","tsx","py","css","html","htm","xml","yaml","yml","csv","log","sh","bat","ps1","env","toml","ini","cfg","conf","rs","go","java","c","cpp","h","rb","php","sql","vue","svelte","gitignore","gitattributes","editorconfig"]);
+      const isText=name=>{const e=name.split(".").pop().toLowerCase();return TEXT_EXTS.has(e);};
+      function fileIcon(name){const e=name.split(".").pop().toLowerCase();if(["jpg","jpeg","png","gif","webp","svg","bmp"].includes(e))return"🖼️";if(["mp4","mov","avi","mkv","webm"].includes(e))return"🎬";if(["mp3","wav","ogg","flac","aac"].includes(e))return"🎵";if(["zip","rar","7z","tar","gz","bz2"].includes(e))return"📦";if(e==="pdf")return"📄";if(["exe","msi","dmg"].includes(e))return"⚙️";if(TEXT_EXTS.has(e))return"📝";return"📄";}
+      function feSetState(msg,isError=false){document.getElementById("fe-body").innerHTML=`<div class="fe-state${isError?" error":""}">${esc(msg)}</div>`;}
       function feRender() {
-        if (!feEntries.length) { feSetState("This folder is empty."); return; }
-        const rows = feEntries.map(e => {
-          const isDir = e.isDir;
-          const icon = isDir ? "📁" : fileIcon(e.name);
-          const rowClass = isDir ? " class=\"fe-dir\"" : "";
-          const nameCell = `<div class="fe-row-name"${rowClass} data-fe-nav="${esc(e.path)}">
-            <span class="fe-icon">${icon}</span>
-            <span class="fe-fname">${esc(e.name)}</span>
-          </div>`;
-          let actions = `<button class="fe-btn del" data-fe-del="${esc(e.path)}" data-fe-name="${esc(e.name)}" data-fe-isdir="${isDir}">Delete</button>`;
-          if (!isDir) {
-            actions = `<button class="fe-btn" data-fe-dl="${esc(e.path)}" data-fe-name="${esc(e.name)}">Download</button>` +
-              (isText(e.name) ? `<button class="fe-btn" data-fe-edit="${esc(e.path)}" data-fe-name="${esc(e.name)}">Edit</button>` : "") +
-              actions;
-          }
-          return `<tr>
-            <td>${nameCell}</td>
-            <td class="fe-size">${fmtSize(e.size)}</td>
-            <td class="fe-date">${fmtDate(e.modified)}</td>
-            <td><div class="fe-actions">${actions}</div></td>
-          </tr>`;
+        if(!feEntries.length){feSetState("This folder is empty.");return;}
+        const rows=feEntries.map(e=>{
+          const isDir=e.isDir,icon=isDir?"📁":fileIcon(e.name);
+          const rowClass=isDir?' class="fe-dir"':'';
+          const nameCell=`<div class="fe-row-name"${rowClass} data-fe-nav="${esc(e.path)}"><span class="fe-icon">${icon}</span><span class="fe-fname">${esc(e.name)}</span></div>`;
+          let acts=`<button class="fe-btn del" data-fe-del="${esc(e.path)}" data-fe-name="${esc(e.name)}" data-fe-isdir="${isDir}">Delete</button>`;
+          if(!isDir) acts=`<button class="fe-btn" data-fe-dl="${esc(e.path)}" data-fe-name="${esc(e.name)}">Download</button>`+(isText(e.name)?`<button class="fe-btn" data-fe-edit="${esc(e.path)}" data-fe-name="${esc(e.name)}">Edit</button>`:"")+acts;
+          return`<tr><td>${nameCell}</td><td class="fe-size">${fmtSize(e.size)}</td><td class="fe-date">${fmtDate(e.modified)}</td><td><div class="fe-actions">${acts}</div></td></tr>`;
         }).join("");
-        const body = document.getElementById("fe-body");
-        body.innerHTML = `<table class="fe-table">
-          <thead><tr><th>Name</th><th>Size</th><th>Modified</th><th></th></tr></thead>
-          <tbody>${rows}</tbody></table>`;
-        // Attach events via delegation (avoids injection via onclick)
-        body.querySelectorAll("[data-fe-nav]").forEach(el =>
-          el.addEventListener("click", () => feNavigate(el.dataset.feNav))
-        );
-        body.querySelectorAll("[data-fe-dl]").forEach(el =>
-          el.addEventListener("click", () => feDownload(el.dataset.feDl, el.dataset.feName))
-        );
-        body.querySelectorAll("[data-fe-edit]").forEach(el =>
-          el.addEventListener("click", () => feEdit(el.dataset.feEdit, el.dataset.feName))
-        );
-        body.querySelectorAll("[data-fe-del]").forEach(el =>
-          el.addEventListener("click", () => feDelete(el.dataset.feDel, el.dataset.feName, el.dataset.feIsdir === "true"))
-        );
+        const body=document.getElementById("fe-body");
+        body.innerHTML=`<table class="fe-table"><thead><tr><th>Name</th><th>Size</th><th>Modified</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+        body.querySelectorAll("[data-fe-nav]").forEach(el=>el.addEventListener("click",()=>feNavigate(el.dataset.feNav)));
+        body.querySelectorAll("[data-fe-dl]").forEach(el=>el.addEventListener("click",()=>feDownload(el.dataset.feDl,el.dataset.feName)));
+        body.querySelectorAll("[data-fe-edit]").forEach(el=>el.addEventListener("click",()=>feEdit(el.dataset.feEdit,el.dataset.feName)));
+        body.querySelectorAll("[data-fe-del]").forEach(el=>el.addEventListener("click",()=>feDelete(el.dataset.feDel,el.dataset.feName,el.dataset.feIsdir==="true")));
+      }
+      async function feDownload(path,name){feStatus(`Downloading ${name}…`);try{const r=await fsSend("download",{path});const url=URL.createObjectURL(new Blob([b64ToUint8(r.content)]));const a=Object.assign(document.createElement("a"),{href:url,download:name});a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);feStatus(`Downloaded ${name}`,"ok");}catch(err){feStatus(`Download failed: ${err.message}`,"error");}}
+      async function feEdit(path,name){feStatus(`Loading ${name}…`);try{const r=await fsSend("download",{path});const text=new TextDecoder().decode(b64ToUint8(r.content));feStatus("");openEditModal(path,name,text);}catch(err){feStatus(`Load failed: ${err.message}`,"error");}}
+      async function feNewFile(){const name=prompt("New file name:");if(!name||!fePath)return;try{await fsSend("mkfile",{path:joinPath(fePath,name)});feStatus(`Created ${name}`,"ok");feRefresh();}catch(err){feStatus(err.message,"error");}}
+      async function feNewFolder(){const name=prompt("New folder name:");if(!name||!fePath)return;try{await fsSend("mkdir",{path:joinPath(fePath,name)});feStatus(`Created ${name}`,"ok");feRefresh();}catch(err){feStatus(err.message,"error");}}
+      async function feDelete(path,name,isDir){if(!confirm(`Delete ${isDir?"folder and all contents":"file"} "${name}"?`))return;try{await fsSend("delete",{path});feStatus(`Deleted ${name}`,"ok");feRefresh();}catch(err){feStatus(err.message,"error");}}
+      function feUploadClick(){document.getElementById("fe-upload-input").click();}
+      async function handleUpload(event){const files=[...event.target.files];event.target.value="";if(!files.length||!fePath)return;for(const file of files){feStatus(`Uploading ${file.name}…`);try{const b64=uint8ToB64(new Uint8Array(await file.arrayBuffer()));await fsSend("upload",{path:joinPath(fePath,file.name),content:b64});feStatus(`Uploaded ${file.name}`,"ok");}catch(err){feStatus(`Failed ${file.name}: ${err.message}`,"error");}}feRefresh();}
+      let feStatusTimer=null;
+      function feStatus(msg,type=""){const el=document.getElementById("fe-status");el.textContent=msg;el.className="fe-status"+(type?` ${type}`:"");clearTimeout(feStatusTimer);if(msg&&type)feStatusTimer=setTimeout(()=>{el.textContent="";el.className="fe-status";},4000);}
+      let editPath=null;
+      function openEditModal(path,name,text){editPath=path;document.getElementById("fe-modal-title").textContent=name;document.getElementById("fe-modal-textarea").value=text;document.getElementById("fe-modal-overlay").classList.add("open");document.getElementById("fe-modal-textarea").focus();}
+      function closeEditModal(){document.getElementById("fe-modal-overlay").classList.remove("open");editPath=null;}
+      async function saveEditModal(){if(!editPath)return;feStatus("Saving…");try{await fsSend("upload",{path:editPath,content:uint8ToB64(new TextEncoder().encode(document.getElementById("fe-modal-textarea").value))});feStatus("Saved","ok");closeEditModal();}catch(err){feStatus(`Save failed: ${err.message}`,"error");}}
+      document.getElementById("fe-modal-textarea").addEventListener("keydown",e=>{if(e.ctrlKey&&e.code==="KeyS"){e.preventDefault();saveEditModal();}});
+
+      // ── Terminal ──────────────────────────────────────────────
+      const stripAnsi = s => s.replace(/\x1b\[[0-9;]*[mGKHFABCDJst]/g,"").replace(/\x1b\][^\x07]*\x07/g,"");
+
+      function termKeyDown(e) {
+        if(e.key==="Enter"){termRun();return;}
+        if(e.key==="ArrowUp"){e.preventDefault();if(termHistIdx<termHistory.length-1){termHistIdx++;$termInput.value=termHistory[termHistIdx];setTimeout(()=>$termInput.setSelectionRange($termInput.value.length,$termInput.value.length),0);}return;}
+        if(e.key==="ArrowDown"){e.preventDefault();if(termHistIdx>0){termHistIdx--;$termInput.value=termHistory[termHistIdx];}else if(termHistIdx===0){termHistIdx=-1;$termInput.value="";}return;}
+        if(e.key==="Escape"){$termInput.value="";termHistIdx=-1;}
       }
 
-      async function feDownload(path, name) {
-        feStatus(`Downloading ${name}…`);
-        try {
-          const res = await fsSend("download", { path });
-          const bytes = b64ToUint8(res.content);
-          const url = URL.createObjectURL(new Blob([bytes]));
-          const a = Object.assign(document.createElement("a"), { href: url, download: name });
-          a.click(); setTimeout(() => URL.revokeObjectURL(url), 5000);
-          feStatus(`Downloaded ${name}`, "ok");
-        } catch (err) { feStatus(`Download failed: ${err.message}`, "error"); }
+      function termRun() {
+        const cmd=$termInput.value.trim();
+        if(!cmd||termRunning||!watchingId)return;
+        $termInput.value="";
+        termHistory.unshift(cmd);if(termHistory.length>100)termHistory.pop();termHistIdx=-1;
+        termRunning=true;$termRunBtn.disabled=true;$termInput.disabled=true;
+
+        // Build block
+        const block=document.createElement("div"); block.className="term-block";
+        const cmdLine=document.createElement("div"); cmdLine.className="term-cmd-line"; cmdLine.textContent=cmd;
+        const lines=document.createElement("div");
+        const running=document.createElement("div"); running.className="term-running"; running.textContent="running…";
+        block.appendChild(cmdLine); block.appendChild(lines); block.appendChild(running);
+        $termOutput.appendChild(block);
+        $termOutput.scrollTop=$termOutput.scrollHeight;
+
+        const id=++termReqId;
+        const timer=setTimeout(()=>termFinish(id,-1,"Command timed out (60s)"),65000);
+        termPending.set(id,{block,lines,running,timer});
+
+        if(ws&&ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:"exec_req",id,command:cmd}));
+        else termFinish(id,-1,"Not connected to device");
       }
 
-      async function feEdit(path, name) {
-        feStatus(`Loading ${name}…`);
-        try {
-          const res = await fsSend("download", { path });
-          const text = new TextDecoder().decode(b64ToUint8(res.content));
-          feStatus("");
-          openEditModal(path, name, text);
-        } catch (err) { feStatus(`Load failed: ${err.message}`, "error"); }
+      function termFinish(id,exitCode,errMsg) {
+        const req=termPending.get(id); if(!req)return;
+        clearTimeout(req.timer); termPending.delete(id);
+        req.running.remove();
+        if(errMsg){const el=document.createElement("div");el.className="term-stderr";el.textContent=errMsg;req.lines.appendChild(el);}
+        const doneEl=document.createElement("div");
+        doneEl.className=`term-exit ${exitCode===0?"ok":"fail"}`;
+        doneEl.textContent=`exit ${exitCode}`;
+        req.block.appendChild(doneEl);
+        $termOutput.scrollTop=$termOutput.scrollHeight;
+        termRunning=false;$termRunBtn.disabled=false;$termInput.disabled=false;$termInput.focus();
       }
 
-      async function feNewFile() {
-        const name = prompt("New file name:");
-        if (!name || !fePath) return;
-        try {
-          await fsSend("mkfile", { path: joinPath(fePath, name) });
-          feStatus(`Created ${name}`, "ok"); feRefresh();
-        } catch (err) { feStatus(err.message, "error"); }
-      }
-
-      async function feNewFolder() {
-        const name = prompt("New folder name:");
-        if (!name || !fePath) return;
-        try {
-          await fsSend("mkdir", { path: joinPath(fePath, name) });
-          feStatus(`Created ${name}`, "ok"); feRefresh();
-        } catch (err) { feStatus(err.message, "error"); }
-      }
-
-      async function feDelete(path, name, isDir) {
-        if (!confirm(`Delete ${isDir ? "folder and all contents" : "file"} "${name}"?`)) return;
-        try {
-          await fsSend("delete", { path });
-          feStatus(`Deleted ${name}`, "ok"); feRefresh();
-        } catch (err) { feStatus(err.message, "error"); }
-      }
-
-      function feUploadClick() { document.getElementById("fe-upload-input").click(); }
-
-      async function handleUpload(event) {
-        const files = [...event.target.files]; event.target.value = "";
-        if (!files.length || !fePath) return;
-        for (const file of files) {
-          feStatus(`Uploading ${file.name}…`);
-          try {
-            const buf = await file.arrayBuffer();
-            const b64 = uint8ToB64(new Uint8Array(buf));
-            await fsSend("upload", { path: joinPath(fePath, file.name), content: b64 });
-            feStatus(`Uploaded ${file.name}`, "ok");
-          } catch (err) { feStatus(`Failed ${file.name}: ${err.message}`, "error"); }
+      function handleExecRes(m) {
+        const req=termPending.get(m.id); if(!req)return;
+        if(m.output!==undefined) {
+          const text=stripAnsi(m.output).replace(/\r?\n$/,"");
+          const el=document.createElement("div");
+          el.className=m.stream==="stderr"?"term-stderr":"term-stdout";
+          el.textContent=text||""; // empty string = blank line (div still takes space via line-height)
+          req.lines.appendChild(el);
+          $termOutput.scrollTop=$termOutput.scrollHeight;
         }
-        feRefresh();
+        if(m.done) termFinish(m.id,m.exitCode??0);
       }
 
-      let feStatusTimer = null;
-      function feStatus(msg, type = "") {
-        const el = document.getElementById("fe-status");
-        el.textContent = msg; el.className = "fe-status" + (type ? ` ${type}` : "");
-        clearTimeout(feStatusTimer);
-        if (msg && type) feStatusTimer = setTimeout(() => { el.textContent = ""; el.className = "fe-status"; }, 4000);
+      function termClear() {
+        for(const[id,req]of termPending){clearTimeout(req.timer);termPending.delete(id);}
+        termRunning=false;$termRunBtn.disabled=false;$termInput.disabled=false;
+        $termOutput.innerHTML="";
       }
-
-      // Edit modal
-      let editPath = null;
-      function openEditModal(path, name, text) {
-        editPath = path;
-        document.getElementById("fe-modal-title").textContent = name;
-        document.getElementById("fe-modal-textarea").value = text;
-        document.getElementById("fe-modal-overlay").classList.add("open");
-        document.getElementById("fe-modal-textarea").focus();
-      }
-      function closeEditModal() {
-        document.getElementById("fe-modal-overlay").classList.remove("open");
-        editPath = null;
-      }
-      async function saveEditModal() {
-        if (!editPath) return;
-        const text = document.getElementById("fe-modal-textarea").value;
-        feStatus("Saving…");
-        try {
-          const bytes = new TextEncoder().encode(text);
-          await fsSend("upload", { path: editPath, content: uint8ToB64(bytes) });
-          feStatus("Saved", "ok"); closeEditModal();
-        } catch (err) { feStatus(`Save failed: ${err.message}`, "error"); }
-      }
-      // Ctrl+S inside modal saves
-      document.getElementById("fe-modal-textarea").addEventListener("keydown", e => {
-        if (e.ctrlKey && e.code === "KeyS") { e.preventDefault(); saveEditModal(); }
-      });
 
       // ── WebSocket ─────────────────────────────────────────────
       function connect() {
-        const proto = location.protocol === "https:" ? "wss" : "ws";
-        ws = new WebSocket(`${proto}://${location.host}/?role=viewer`);
-        ws.binaryType = "blob";
+        const proto=location.protocol==="https:"?"wss":"ws";
+        ws=new WebSocket(`${proto}://${location.host}/?role=viewer`);
+        ws.binaryType="blob";
 
-        ws.onopen = () => {
-          $connDot.classList.add("ok"); $connLabel.textContent = "Connected";
-          if (watchingId && devices[watchingId])
-            ws.send(JSON.stringify({ type:"watch", id:watchingId }));
+        ws.onopen=()=>{
+          $connDot.classList.add("ok");$connLabel.textContent="Connected";
+          if(watchingId&&devices[watchingId]) ws.send(JSON.stringify({type:"watch",id:watchingId}));
         };
 
-        ws.onmessage = (event) => {
-          if (typeof event.data !== "string") {
-            // Binary frame — update stream
-            if (watchingId) {
-              const next = URL.createObjectURL(event.data);
-              $streamImg.onload = () => { if (currentUrl) URL.revokeObjectURL(currentUrl); currentUrl = next; };
-              $streamImg.src = next;
-              $streamImg.style.display = "block";
-              $overlayMsg.className = "overlay-msg";
-              setBadge("live");
-            }
+        ws.onmessage=(event)=>{
+          if(typeof event.data!=="string"){
+            if(watchingId){const next=URL.createObjectURL(event.data);$streamImg.onload=()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=next;};$streamImg.src=next;$streamImg.style.display="block";$overlayMsg.className="overlay-msg";setBadge("live");}
             return;
           }
           try {
-            const m = JSON.parse(event.data);
-            if (m.type === "agents") {
-              devices = {};
-              for (const a of m.list) devices[a.id] = a;
-              const n = m.list.length;
-              $connLabel.textContent = `${n} device${n !== 1 ? "s" : ""} online`;
-              if (watchingId && !devices[watchingId]) showHome();
-              else { renderSidebar(); if (!watchingId) renderHome(); }
-            } else if (m.type === "agent_offline") {
+            const m=JSON.parse(event.data);
+            if(m.type==="agents"){
+              devices={};for(const a of m.list)devices[a.id]=a;
+              const n=m.list.length;$connLabel.textContent=`${n} device${n!==1?"s":""} online`;
+              if(watchingId&&!devices[watchingId])showHome();
+              else{renderSidebar();if(!watchingId)renderHome();}
+            } else if(m.type==="agent_offline"){
               delete devices[m.id];
-              if (watchingId === m.id) {
-                stopControl();
-                $overlayMsg.className = "overlay-msg show"; $overlayMsg.textContent = "Device disconnected.";
-                $streamImg.style.display = "none"; setBadge("waiting");
-              }
-              renderSidebar(); if (!watchingId) renderHome();
-              const n = Object.keys(devices).length;
-              $connLabel.textContent = `${n} device${n !== 1 ? "s" : ""} online`;
-            } else if (m.type === "fs_res") {
+              if(watchingId===m.id){stopControl();$overlayMsg.className="overlay-msg show";$overlayMsg.textContent="Device disconnected.";$streamImg.style.display="none";setBadge("waiting");}
+              renderSidebar();if(!watchingId)renderHome();
+              const n=Object.keys(devices).length;$connLabel.textContent=`${n} device${n!==1?"s":""} online`;
+            } else if(m.type==="fs_res"){
               handleFsRes(m);
+            } else if(m.type==="exec_res"){
+              handleExecRes(m);
             }
-          } catch (_) {}
+          } catch(_){}
         };
 
-        ws.onclose = () => {
-          $connDot.classList.remove("ok"); $connLabel.textContent = "Reconnecting…";
-          $badge.className = "badge"; setTimeout(connect, 3000);
-        };
-        ws.onerror = () => { $connLabel.textContent = "Connection error"; };
+        ws.onclose=()=>{$connDot.classList.remove("ok");$connLabel.textContent="Reconnecting…";$badge.className="badge";setTimeout(connect,3000);};
+        ws.onerror=()=>{$connLabel.textContent="Connection error";};
       }
 
-      setInterval(() => { renderSidebar(); if (!watchingId) renderHome(); }, 15000);
+      setInterval(()=>{renderSidebar();if(!watchingId)renderHome();},15000);
       showHome();
       connect();
     </script>
