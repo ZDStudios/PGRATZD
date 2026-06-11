@@ -301,15 +301,28 @@ def _extract_icon_b64(path, size=48):
                 ("szTypeName",    ctypes.c_wchar * 80),
             ]
 
+        shell32.ExtractIconExW.restype = ctypes.c_uint
+
+        # Primary: SHGetFileInfoW (resolves .lnk via shell, needs COM on thread)
         shfi = SHFILEINFOW()
-        ret = shell32.SHGetFileInfoW(
+        ret  = shell32.SHGetFileInfoW(
             str(path), 0, ctypes.byref(shfi), ctypes.sizeof(shfi),
             0x100 | 0x0,  # SHGFI_ICON | SHGFI_LARGEICON
         )
-        if not ret or not shfi.hIcon:
-            return None
+        hicon = shfi.hIcon if (ret and shfi.hIcon) else 0
 
-        hicon = shfi.hIcon
+        # Fallback: ExtractIconExW (works without COM for plain EXE/DLL icons)
+        if not hicon:
+            hL = ctypes.c_size_t(0)
+            hS = ctypes.c_size_t(0)
+            if shell32.ExtractIconExW(str(path), 0, ctypes.byref(hL), ctypes.byref(hS), 1):
+                hicon = hL.value or hS.value
+                unused = hS.value if hicon == hL.value else hL.value
+                if unused:
+                    user32.DestroyIcon(unused)
+
+        if not hicon:
+            return None
 
         # Create memory DC + bitmap to render the icon into
         hdc_screen = user32.GetDC(None)
@@ -379,31 +392,37 @@ def _apps_work(ws_conn, msg):
             pass
 
     if op == "list":
-        roots = []
-        for base_env in ["PROGRAMDATA", "APPDATA"]:
-            base = os.environ.get(base_env, "")
-            if base:
-                p = pathlib.Path(base) / "Microsoft" / "Windows" / "Start Menu" / "Programs"
-                if p.exists():
-                    roots.append(p)
+        # COM must be initialized on this thread for shell icon resolution
+        # (needed for Office, UWP, and other COM-based icon handlers)
+        ctypes.windll.ole32.CoInitialize(None)
+        try:
+            roots = []
+            for base_env in ["PROGRAMDATA", "APPDATA"]:
+                base = os.environ.get(base_env, "")
+                if base:
+                    p = pathlib.Path(base) / "Microsoft" / "Windows" / "Start Menu" / "Programs"
+                    if p.exists():
+                        roots.append(p)
 
-        seen: set = set()
-        apps = []
-        for root in roots:
-            for lnk in sorted(root.rglob("*.lnk"), key=lambda x: x.stem.lower()):
-                key = lnk.stem.lower()
-                if key in seen:
-                    continue
-                seen.add(key)
-                rel = lnk.relative_to(root)
-                category = str(rel.parent) if str(rel.parent) != "." else ""
-                icon = _extract_icon_b64(str(lnk))
-                apps.append({
-                    "name": lnk.stem,
-                    "path": str(lnk),
-                    "category": category,
-                    "icon": icon,
-                })
+            seen: set = set()
+            apps = []
+            for root in roots:
+                for lnk in sorted(root.rglob("*.lnk"), key=lambda x: x.stem.lower()):
+                    key = lnk.stem.lower()
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    rel = lnk.relative_to(root)
+                    category = str(rel.parent) if str(rel.parent) != "." else ""
+                    icon = _extract_icon_b64(str(lnk))
+                    apps.append({
+                        "name": lnk.stem,
+                        "path": str(lnk),
+                        "category": category,
+                        "icon": icon,
+                    })
+        finally:
+            ctypes.windll.ole32.CoUninitialize()
 
         reply(apps=sorted(apps, key=lambda a: a["name"].lower()))
 
