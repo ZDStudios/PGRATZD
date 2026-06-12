@@ -49,18 +49,33 @@ wss.on("connection", (ws, req) => {
 
     const name = url.searchParams.get("name") || "Unknown Device";
 
-    // Kick any existing agent with the same name (reconnect / watchdog restart)
+    // Kick any existing agent with the same name (reconnect / watchdog restart).
+    // Mark it replaced so its close handler skips broadcasting agent_offline.
+    let evictedId = null;
     for (const [existingId, existingAgent] of agents) {
       if (existingAgent.name === name) {
         console.log(`agent reconnect: replacing ${name} (${existingId})`);
+        existingAgent.replaced = true;
         existingAgent.ws.close(1001, "replaced by new connection");
         agents.delete(existingId);
+        evictedId = existingId;
+        break;
       }
     }
 
     const id = `a${++agentSeq}`;
     const agent = { ws, name, lastFrame: null, connectedAt: Date.now() };
     agents.set(id, agent);
+
+    // Re-attach any viewers that were watching the evicted agent
+    if (evictedId !== null) {
+      for (const [vws, vstate] of viewers) {
+        if (vstate.watchingId === evictedId) {
+          vstate.watchingId = id;
+        }
+      }
+    }
+
     console.log(`agent connected: ${name} (${id}), total: ${agents.size}`);
     broadcast({ type: "agents", list: agentList() });
 
@@ -86,8 +101,11 @@ wss.on("connection", (ws, req) => {
     ws.on("close", () => {
       agents.delete(id);
       console.log(`agent disconnected: ${name} (${id}), total: ${agents.size}`);
-      broadcast({ type: "agent_offline", id });
-      broadcast({ type: "agents", list: agentList() });
+      // Skip offline broadcast if this connection was replaced by a same-name reconnect
+      if (!agent.replaced) {
+        broadcast({ type: "agent_offline", id });
+        broadcast({ type: "agents", list: agentList() });
+      }
     });
 
   } else {

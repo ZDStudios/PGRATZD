@@ -589,10 +589,18 @@
           try {
             const m = JSON.parse(event.data);
             if (m.type === "agents") {
+              const prevName = watchingId ? (devices[watchingId]?.name || null) : null;
               devices = {}; for (const a of m.list) devices[a.id] = a;
               const n = m.list.length; $connLabel.textContent = `${n} device${n!==1?"s":""} online`;
-              if (watchingId && !devices[watchingId]) showHome();
-              else { renderSidebar(); if (!watchingId) renderHome(); }
+              if (watchingId && !devices[watchingId]) {
+                // ID changed — try to re-attach by name (agent reconnected with new ID)
+                const reattach = prevName && m.list.find(a => a.name === prevName);
+                if (reattach) {
+                  watchingId = reattach.id;
+                  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({type:"watch",id:watchingId}));
+                  renderSidebar();
+                } else { showHome(); }
+              } else { renderSidebar(); if (!watchingId) renderHome(); }
             } else if (m.type === "agent_offline") {
               delete devices[m.id];
               if (watchingId === m.id) { stopControl(); $overlayMsg.className="overlay-msg show"; $overlayMsg.textContent="Device disconnected."; $streamImg.style.display="none"; setBadge("waiting"); }
