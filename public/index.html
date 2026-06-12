@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -204,7 +204,56 @@
       .fe-modal-save:hover { background: #4480f5; }
       .fe-modal-cancel { padding: 6px 14px; border-radius: 6px; border: 1px solid #2a2f37; background: transparent; color: #9ca3af; font-size: 13px; cursor: pointer; }
       .fe-modal-cancel:hover { border-color: #4b5563; color: #e6e8eb; }
+
+      /* ── API Docs Panel ── */
+      #api-overlay { position: fixed; inset: 0; background: #000000cc; display: none; align-items: flex-start; justify-content: center; z-index: 500; padding: 32px 20px; overflow-y: auto; }
+      #api-overlay.open { display: flex; }
+      .api-panel { background: #13161b; border: 1px solid #262b33; border-radius: 14px; width: min(820px, 100%); margin-bottom: 32px; }
+      .api-panel-header { display: flex; align-items: center; gap: 12px; padding: 15px 22px; border-bottom: 1px solid #1e2229; }
+      .api-panel-title { font-size: 15px; font-weight: 700; flex: 1; letter-spacing: .04em; }
+      .api-panel-close { background: none; border: none; color: #6b7280; font-size: 18px; cursor: pointer; padding: 2px 8px; border-radius: 5px; line-height: 1; }
+      .api-panel-close:hover { background: #1e2229; color: #e6e8eb; }
+      .api-panel-body { padding: 22px 24px; display: flex; flex-direction: column; gap: 24px; }
+      .api-section { display: flex; flex-direction: column; gap: 8px; }
+      .api-section h3 { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #4b5563; margin-bottom: 2px; }
+      .api-row { display: flex; align-items: center; gap: 10px; background: #0d0f12; border: 1px solid #1e2229; border-radius: 7px; padding: 7px 14px; }
+      .api-method { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; flex-shrink: 0; }
+      .api-method.get  { background: #14532d33; color: #4ade80; }
+      .api-method.post { background: #1e3a5f44; color: #60a5fa; }
+      .api-path { font-family: Consolas, monospace; font-size: 12px; color: #c9d1da; flex: 1; }
+      .api-desc { font-size: 11px; color: #6b7280; white-space: nowrap; }
+      .api-code-wrap { position: relative; }
+      .api-code { background: #080a0d; border: 1px solid #1e2229; border-radius: 7px; padding: 12px 16px; padding-right: 70px; font-family: Consolas, monospace; font-size: 12px; color: #c9d1da; white-space: pre-wrap; word-break: break-all; line-height: 1.55; }
+      .api-copy { position: absolute; top: 7px; right: 8px; font-size: 11px; padding: 3px 9px; border-radius: 4px; border: 1px solid #2a2f37; background: #1a1e25; color: #6b7280; cursor: pointer; transition: all .12s; }
+      .api-copy:hover { border-color: #4b5563; color: #e6e8eb; }
+      .api-note { font-size: 12px; color: #6b7280; line-height: 1.6; }
+      .api-note code { font-size: 11px; background: #1e2229; padding: 1px 5px; border-radius: 3px; color: #9ca3af; }
+      .api-sidebar-btn { font-size: 11px; padding: 3px 9px; border-radius: 5px; border: 1px solid #2a2f37; background: transparent; color: #6b7280; cursor: pointer; margin-left: auto; flex-shrink: 0; transition: all .12s; }
+      .api-sidebar-btn:hover { border-color: #4b5563; color: #e6e8eb; }
+
+      /* ── Markdown render inside API panel ── */
+      #api-panel-body h1 { font-size: 20px; font-weight: 800; letter-spacing: .06em; margin: 0 0 4px; }
+      #api-panel-body h2 { font-size: 14px; font-weight: 700; color: #e6e8eb; margin: 20px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #1e2229; }
+      #api-panel-body h3 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6b7280; margin: 16px 0 6px; }
+      #api-panel-body p  { font-size: 13px; color: #9ca3af; line-height: 1.7; margin: 0 0 10px; }
+      #api-panel-body ul, #api-panel-body ol { font-size: 13px; color: #9ca3af; padding-left: 20px; margin: 0 0 10px; }
+      #api-panel-body li { margin-bottom: 3px; }
+      #api-panel-body a  { color: #60a5fa; text-decoration: none; }
+      #api-panel-body a:hover { text-decoration: underline; }
+      #api-panel-body code { font-family: Consolas, monospace; font-size: 12px; background: #1e2229; padding: 1px 5px; border-radius: 3px; color: #c9d1da; }
+      #api-panel-body pre { background: #080a0d; border: 1px solid #1e2229; border-radius: 7px; padding: 14px 16px; overflow-x: auto; margin: 0 0 12px; }
+      #api-panel-body pre code { background: none; padding: 0; font-size: 12px; color: #c9d1da; line-height: 1.6; }
+      #api-panel-body table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0 0 12px; }
+      #api-panel-body th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #4b5563; padding: 6px 12px; border-bottom: 1px solid #1e2229; }
+      #api-panel-body td { padding: 6px 12px; border-bottom: 1px solid #13161b; color: #9ca3af; }
+      #api-panel-body td:first-child { font-family: Consolas, monospace; font-size: 12px; color: #c9d1da; }
+      #api-panel-body tr:last-child td { border-bottom: none; }
+      #api-panel-body hr { border: none; border-top: 1px solid #1e2229; margin: 20px 0; }
+      #api-panel-body strong { color: #e6e8eb; font-weight: 600; }
+      .api-docs-loading { padding: 40px; text-align: center; font-size: 13px; color: #4b5563; }
+      .api-docs-error   { padding: 40px; text-align: center; font-size: 13px; color: #f87171; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
   </head>
   <body>
     <!-- Login overlay -->
@@ -232,6 +281,7 @@
       <div class="sidebar-footer">
         <div class="conn-dot" id="conn-dot"></div>
         <span id="conn-label">Connecting…</span>
+        <button class="api-sidebar-btn" onclick="toggleApi()">API</button>
       </div>
     </aside>
 
@@ -331,6 +381,17 @@
       </div>
     </div>
 
+    <!-- API Docs Overlay -->
+    <div id="api-overlay" onclick="if(event.target===this)toggleApi()">
+      <div class="api-panel">
+        <div class="api-panel-header">
+          <span class="api-panel-title">REST API Reference</span>
+          <button class="api-panel-close" style="font-size:12px;padding:3px 9px;margin-right:4px;border:1px solid #2a2f37;border-radius:5px;background:transparent;color:#6b7280;cursor:pointer" onclick="_apiLoaded=false;loadApiDocs()">&#8635; Reload</button>
+          <button class="api-panel-close" onclick="toggleApi()">&#x2715;</button>
+        </div>
+        <div class="api-panel-body" id="api-panel-body"></div>
+      </div>
+    </div>
     <script>
       // ── DOM refs ──────────────────────────────────────────────
       const $deviceList  = document.getElementById("device-list");
@@ -693,6 +754,33 @@
 
       // Auto-connect if we have a stored password; otherwise show login
       if (viewerPassword) { connect(); } else { showLogin(); }
+    
+      // ── API Docs Panel ────────────────────────────────────────
+      let _apiLoaded = false;
+
+      function toggleApi() {
+        const overlay = document.getElementById("api-overlay");
+        if (!overlay.classList.contains("open")) {
+          overlay.classList.add("open");
+          if (!_apiLoaded) loadApiDocs();
+        } else {
+          overlay.classList.remove("open");
+        }
+      }
+
+      async function loadApiDocs() {
+        const body = document.getElementById("api-panel-body");
+        body.innerHTML = '<div class="api-docs-loading">Loading docs…</div>';
+        try {
+          const resp = await fetch("/api-docs.md");
+          if (!resp.ok) throw new Error("HTTP " + resp.status);
+          const md = await resp.text();
+          body.innerHTML = marked.parse(md);
+          _apiLoaded = true;
+        } catch (e) {
+          body.innerHTML = '<div class="api-docs-error">Failed to load API.md: ' + esc(e.message) + '</div>';
+        }
+      }
     </script>
   </body>
 </html>
