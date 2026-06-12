@@ -47,8 +47,18 @@ wss.on("connection", (ws, req) => {
       return;
     }
 
-    const id = `a${++agentSeq}`;
     const name = url.searchParams.get("name") || "Unknown Device";
+
+    // Kick any existing agent with the same name (reconnect / watchdog restart)
+    for (const [existingId, existingAgent] of agents) {
+      if (existingAgent.name === name) {
+        console.log(`agent reconnect: replacing ${name} (${existingId})`);
+        existingAgent.ws.close(1001, "replaced by new connection");
+        agents.delete(existingId);
+      }
+    }
+
+    const id = `a${++agentSeq}`;
     const agent = { ws, name, lastFrame: null, connectedAt: Date.now() };
     agents.set(id, agent);
     console.log(`agent connected: ${name} (${id}), total: ${agents.size}`);
