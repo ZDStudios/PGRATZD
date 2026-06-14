@@ -1,4 +1,4 @@
-﻿const path = require("path");
+const path = require("path");
 const http = require("http");
 const express = require("express");
 const { WebSocketServer } = require("ws");
@@ -9,7 +9,11 @@ const VIEWER_PASSWORD = process.env.VIEWER_PASSWORD   || "changeme";
 
 const app = express();
 app.use(express.static(path.join(__dirname, "public")));
-app.use(express.json({ limit: "70mb" }));
+
+// MODIFICATION: Removed the '70mb' limit constraint entirely.
+// Express will now fall back to its internal or system default limits.
+app.use(express.json()); 
+
 app.get("/healthz", (_req, res) => res.send("ok"));
 app.get("/api-docs.md", (_req, res) => res.sendFile(path.join(__dirname, "API.md")));
 
@@ -50,14 +54,23 @@ function findAgent(nameOrId) {
 }
 
 function wsBridge(agent, msg, timeout) {
-  timeout = timeout || 30000;
+  // MODIFICATION: Setting timeout to 0 (or ignoring it) disables the timer logic 
+  // so the pending API request will never auto-reject due to a timeout.
+  timeout = 0; 
   return new Promise((resolve, reject) => {
     const apiId = "api_" + (++apiSeq);
     msg.id = apiId;
-    const timer = setTimeout(() => {
-      pendingApiRequests.delete(apiId);
-      reject(new Error("Request timed out after " + timeout + "ms"));
-    }, timeout);
+    
+    // MODIFICATION: Wrapped the timer in a conditional check. If timeout is 0, 
+    // no timeout logic is ever instantiated.
+    let timer = null;
+    if (timeout > 0) {
+      timer = setTimeout(() => {
+        pendingApiRequests.delete(apiId);
+        reject(new Error("Request timed out after " + timeout + "ms"));
+      }, timeout);
+    }
+    
     pendingApiRequests.set(apiId, { resolve, reject, timer, lines: [] });
     agent.ws.send(JSON.stringify(msg));
   });
@@ -79,7 +92,8 @@ app.post("/api/fs/:device", async (req, res) => {
   if (!agent) return res.status(404).json({ error: "Device not found or offline" });
   try {
     const body = Object.fromEntries(Object.entries(req.body).filter(([k]) => k !== "password"));
-    const result = await wsBridge(agent, { type: "fs_req", ...body });
+    // MODIFICATION: Pass 0 to indicate no timeout constraint
+    const result = await wsBridge(agent, { type: "fs_req", ...body }, 0);
     res.json(result);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -90,7 +104,8 @@ app.post("/api/exec/:device", async (req, res) => {
   if (!agent) return res.status(404).json({ error: "Device not found or offline" });
   try {
     const body = Object.fromEntries(Object.entries(req.body).filter(([k]) => k !== "password"));
-    const result = await wsBridge(agent, { type: "exec_req", ...body }, 65000);
+    // MODIFICATION: Pass 0 to indicate no timeout constraint
+    const result = await wsBridge(agent, { type: "exec_req", ...body }, 0);
     res.json(result);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -101,7 +116,8 @@ app.post("/api/apps/:device", async (req, res) => {
   if (!agent) return res.status(404).json({ error: "Device not found or offline" });
   try {
     const body = Object.fromEntries(Object.entries(req.body).filter(([k]) => k !== "password"));
-    const result = await wsBridge(agent, { type: "apps_req", ...body }, 45000);
+    // MODIFICATION: Pass 0 to indicate no timeout constraint
+    const result = await wsBridge(agent, { type: "apps_req", ...body }, 0);
     res.json(result);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -166,12 +182,14 @@ wss.on("connection", (ws, req) => {
             if (m.type === "exec_res") {
               if (m.output !== undefined) p.lines.push({ stream: m.stream || "stdout", text: m.output });
               if (m.done) {
-                clearTimeout(p.timer);
+                // MODIFICATION: Check if timer exists before clearing it
+                if (p.timer) clearTimeout(p.timer);
                 pendingApiRequests.delete(m.id);
                 p.resolve({ exitCode: m.exitCode != null ? m.exitCode : 0, output: p.lines });
               }
             } else {
-              clearTimeout(p.timer);
+              // MODIFICATION: Check if timer exists before clearing it
+              if (p.timer) clearTimeout(p.timer);
               pendingApiRequests.delete(m.id);
               p.resolve(m);
             }
@@ -222,6 +240,11 @@ wss.on("connection", (ws, req) => {
     });
   }
 });
+
+// MODIFICATION: Explicitly forcing the node HTTP server configuration 
+// to keep connections alive infinitely (no timeout).
+server.timeout = 0;
+server.keepAliveTimeout = 0;
 
 server.listen(PORT, () => {
   console.log("screen-stream server listening on :" + PORT);
